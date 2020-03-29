@@ -2,9 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a525f85b-cbba-4e82-9ea0-5345c2f0b52e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/baralho" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front/baralho/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front/baralho/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/baralho/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/public/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front/baralho/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/salas.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/salas.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -12,7 +17,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/front/baralho" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1ZgbDEZwSScnl2ZsskEVlqQbhtz" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -25,7 +30,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../chiaretto/adminlte2-vuejs-laravel" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
   </component>
@@ -63,6 +68,7 @@
       <updated>1585263562513</updated>
       <workItem from="1585263564005" duration="9986000" />
       <workItem from="1585285893198" duration="4764000" />
+      <workItem from="1585428924087" duration="10610000" />
     </task>
     <servers />
   </component>
@@ -154,6 +160,14 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state width="1878" height="336" key="GridCell.Tab.3.right/0.0.1920.1050/1920.0.1366.768@0.0.1920.1050" timestamp="1585285846047" />
+    <state x="610" y="142" width="690" height="759" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1585443015550">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="610" y="142" width="690" height="759" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1050/1920.0.1366.768@0.0.1920.1050" timestamp="1585443015550" />
+    <state x="636" y="265" width="647" height="518" key="find.popup" timestamp="1585431094686">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="636" y="265" width="647" height="518" key="find.popup/0.0.1920.1050/1920.0.1366.768@0.0.1920.1050" timestamp="1585431094686" />
     <state x="624" y="240" key="run.anything.popup" timestamp="1585271005872">
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
@@ -164,7 +178,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routes/salas.js</url>
-          <line>173</line>
+          <line>163</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>

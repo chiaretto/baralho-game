@@ -39,7 +39,6 @@ const fullCards = colours.map((colour) => {
 
 console.log(fullCards)
 
-let quantidadeBaralhos = 2;
 let salas = []
 let salaFechada = false
 let monte = []
@@ -61,8 +60,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Reiniciar. */
-router.post('/reiniciar', function(req, res, next) {
-  quantidadeBaralhos = 2;
+router.get('/reiniciar', function(req, res, next) {
   salas = []
   salaFechada = false
   monte = []
@@ -109,22 +107,14 @@ router.post('/embaralhar', function(req, res, next) {
     jogador.cartas = monte.splice(0, quantidade).sort();
   })
 
+  // Tirar Curinga
+  curingas = monte.splice(0, 1)
+
   res.json({
     embaralhado: true
   })
 });
-
-/* Tirar Curinga. */
-router.post('/curingas', function(req, res, next) {
-  const quantidade = req.body.quantidade;
-
-  // Embaralha e cria o monte
-  curingas = monte.splice(0, quantidade)
-
-  res.json({
-    curingas: curingas
-  })
-});
+;
 
 /* Novo jogador. */
 router.post('/entrar', function(req, res, next) {
@@ -169,15 +159,21 @@ router.post('/cartas', function(req, res, next) {
   }
 });
 
-/* Dar cartas. */
+/* Jogar. */
 router.post('/jogar', function(req, res, next) {
   posicaoCarta = req.body.posicaoCarta
   nome = req.body.nome
   senha = req.body.senha
+
   jogador = jogadores.filter((j) => { return j.nome.toString() === nome.toString() && j.senha.toString() === senha.toString() })
   if (jogador.length) {
     jogador = jogador[0]
-    mesa.push(jogador.cartas.splice(posicaoCarta,1))
+    mesa.push(
+        {
+          carta: jogador.cartas.splice(posicaoCarta, 1)[0],
+          jogador: nome
+        }
+    )
 
     res.json({
       cartas: jogador.cartas
@@ -185,6 +181,12 @@ router.post('/jogar', function(req, res, next) {
   } else {
     res.json()
   }
+});
+
+/* Nova Rodada. */
+router.post('/novaRodada', function(req, res, next) {
+  mesa = []
+  res.json()
 });
 
 module.exports = router;

@@ -37,7 +37,7 @@ const fullCards = colours.map((colour) => {
   return fullCardsColours.map((card) => card+colour)
 }).reduce((a, b) => a.concat(b), []);
 
-console.log(fullCards)
+console.log('Baralho Iniciado:'  + nypes)
 
 let salas = []
 let salaFechada = false
@@ -54,7 +54,14 @@ router.get('/', function(req, res, next) {
         curingas: curingas,
         mesa: mesa,
         quantidadeMesa: mesa.length,
-        jogadores: jogadores.map((jogador) => { return { nome: jogador.nome, quantidadeCartas: jogador.cartas.length} })
+        jogadores: jogadores.map((jogador) => { return {
+          nome: jogador.nome,
+          quantidadeCartas: jogador.cartas.length,
+          pontosRodada: jogador.pontosRodada,
+          previsaoRodada: jogador.previsaoRodada,
+          dealer: jogador.dealer,
+          admin: jogador.admin
+        } })
       }
   )
 });
@@ -69,6 +76,23 @@ router.get('/reiniciar', function(req, res, next) {
   jogadores = []
   res.json()
 });
+
+/* Reiniciar. */
+router.get('/novaPartida', function(req, res, next) {
+  monte = []
+  mesa = []
+  curingas = []
+  // Limpa jogadore
+  jogadores.forEach((j) => {
+    j.admin = false
+    j.dealer = false
+    j.cartas = []
+    j.pontosRodada = 0
+    j.previsaoRodada = 0
+  })
+  res.json()
+})
+
 
 /* Dados completos dados da sala */
 router.get('/admin', function(req, res, next) {
@@ -88,44 +112,85 @@ router.get('/admin', function(req, res, next) {
 /* Embaralhar. */
 router.post('/embaralhar', function(req, res, next) {
   const quantidade = parseInt(req.body.quantidade);
+  const nome = req.body.nome;
+  const senha = req.body.senha;
 
-  // Limpa jogadores
-  jogadores.forEach((jogador) => {
-    jogador.cartas = [];
-  })
-  // Limpa Mesa
-  mesa = []
+  if (quantidade > 0) {
+    // Limpa jogadores
+    jogadores.forEach((j) => {
+      j.cartas = [];
+      j.pontosRodada = 0
+      j.previsaoRodada = 0
+      j.dealer = false
+    })
 
-  // Limpa Curinga
-  curingas = []
+    let jogador = identificarJogador(nome, senha)
 
-  // Embaralha e cria o monte
-  monte = (fullCards.sort(() => .5 - Math.random()))
+    // Seta dealer
+    jogador.dealer = true
 
-  // Distribui as cartas
-  jogadores.forEach((jogador) => {
-    jogador.cartas = monte.splice(0, quantidade).sort();
-  })
+    // Limpa Mesa
+    mesa = []
 
-  // Tirar Curinga
-  curingas = monte.splice(0, 1)
+    // Limpa Curinga
+    curingas = []
 
-  res.json({
-    embaralhado: true
-  })
+    // Embaralha e cria o monte
+    monte = (fullCards.sort(() => .5 - Math.random()))
+
+    // Distribui as cartas
+    jogadores.forEach((j) => {
+      j.cartas = monte.splice(0, quantidade).sort();
+    })
+
+    // Tirar Curinga
+    curingas = monte.splice(0, 1)
+
+    res.json({
+      embaralhado: true
+    })
+  } else {
+    res.json({
+      embaralhado: false
+    })
+  }
 });
-;
+
+/* Setar ganhador da rodada. */
+router.post('/setarGanhador', function(req, res, next) {
+  const posicaoCartaVencedora = req.body.posicaoCartaVencedora;
+
+  // só permite setar ganhador quanto todos tiverem jogado na mesa
+  if (mesa.length === jogadores.length) {
+    let cartaVencedora = mesa.slice(posicaoCartaVencedora, posicaoCartaVencedora+1)
+    let nome = cartaVencedora[0].jogador
+
+    // identifica jogador da carta vencedora e soma ponto
+    let jogador = jogadores.filter((j) => { return (j.nome.toString() === nome.toString()) })
+    if (jogador.length > 0) {
+      jogador[0].pontosRodada += 1
+    }
+
+    mesa = []
+  }
+
+  res.json()
+});
 
 /* Novo jogador. */
 router.post('/entrar', function(req, res, next) {
-  nome = req.body.nome;
-  senha = Math.random() + Math.random();
+  const nome = req.body.nome;
+  const senha = Math.random() + Math.random();
 
   if (!salaFechada) {
     let novo = {
+      admin: false,
       nome: nome,
       senha: senha,
-      cartas: []
+      cartas: [],
+      dealer: false,
+      pontosRodada: 0,
+      previsaoRodada: 0,
     }
     jogadores.push(novo)
     res.json(novo)
@@ -136,24 +201,40 @@ router.post('/entrar', function(req, res, next) {
 
 /* Sair jogador. */
 router.post('/sair', function(req, res, next) {
-  nome = req.body.nome;
-  senha = req.body.senha;
+  const nome = req.body.nome;
+  const senha = req.body.senha;
 
   jogadores = jogadores.filter((j) => { return !(j.nome.toString() === nome.toString() && j.senha.toString() === senha.toString()) })
 
   res.json()
 });
 
-/* Dar cartas. */
-router.post('/cartas', function(req, res, next) {
-  nome = req.body.nome
-  senha = req.body.senha
-  jogador = jogadores.filter((j) => { return j.nome.toString() === nome.toString() && j.senha.toString() === senha.toString() })
+/* Sair jogador. */
+router.post('/virarAdmin', function(req, res, next) {
+  const nome = req.body.nome;
+  const senha = req.body.senha;
 
-  if (jogador.length) {
-    jogador = jogador[0]
+  // Setar jogador como dealer
+  jogadores.forEach((j) => {
+    j.admin = false
+  })
+  let jogador = identificarJogador(nome, senha)
+  jogador.admin = true
+
+  res.json()
+});
+
+/* Ver cartas. */
+router.post('/minhasCartas', function(req, res, next) {
+  const nome = req.body.nome
+  const senha = req.body.senha
+  const jogador = identificarJogador(nome, senha)
+
+  if (jogador) {
     res.json({
-      cartas: jogador.cartas
+      cartas: jogador.cartas,
+      dealer: jogador.dealer,
+      admin: jogador.admin
     })
   } else {
     res.json()
@@ -162,13 +243,12 @@ router.post('/cartas', function(req, res, next) {
 
 /* Jogar. */
 router.post('/jogar', function(req, res, next) {
-  posicaoCarta = parseInt(req.body.posicaoCarta)
-  nome = req.body.nome
-  senha = req.body.senha
+  const posicaoCarta = parseInt(req.body.posicaoCarta)
+  const nome = req.body.nome
+  const senha = req.body.senha
+  let jogador = identificarJogador(nome, senha)
 
-  jogador = jogadores.filter((j) => { return j.nome.toString() === nome.toString() && j.senha.toString() === senha.toString() })
-  if (jogador.length) {
-    jogador = jogador[0]
+  if (jogador && posicaoCarta >= 0) {
     mesa.push(
         {
           carta: jogador.cartas.splice(posicaoCarta, 1)[0],
@@ -190,4 +270,13 @@ router.post('/novaRodada', function(req, res, next) {
   res.json()
 });
 
+const identificarJogador = (nome, senha) => {
+  let jogador = jogadores.filter((j) => { return j.nome.toString() === nome.toString() && j.senha.toString() === senha.toString() })
+  if (jogador.length > 0) {
+    return jogador[0]
+  } else {
+    return null
+  }
+
+}
 module.exports = router;

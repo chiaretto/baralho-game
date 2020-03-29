@@ -87,7 +87,7 @@ router.get('/admin', function(req, res, next) {
 
 /* Embaralhar. */
 router.post('/embaralhar', function(req, res, next) {
-  const quantidade = req.body.quantidade;
+  const quantidade = parseInt(req.body.quantidade);
 
   // Limpa jogadores
   jogadores.forEach((jogador) => {
@@ -149,6 +149,7 @@ router.post('/cartas', function(req, res, next) {
   nome = req.body.nome
   senha = req.body.senha
   jogador = jogadores.filter((j) => { return j.nome.toString() === nome.toString() && j.senha.toString() === senha.toString() })
+
   if (jogador.length) {
     jogador = jogador[0]
     res.json({
@@ -161,7 +162,7 @@ router.post('/cartas', function(req, res, next) {
 
 /* Jogar. */
 router.post('/jogar', function(req, res, next) {
-  posicaoCarta = req.body.posicaoCarta
+  posicaoCarta = parseInt(req.body.posicaoCarta)
   nome = req.body.nome
   senha = req.body.senha
 

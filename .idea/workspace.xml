@@ -9,6 +9,7 @@
       <change beforePath="$PROJECT_DIR$/front/baralho/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front/baralho/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/public/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front/baralho/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/salas.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/salas.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,7 +17,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/front/baralho" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1ZgbDEZwSScnl2ZsskEVlqQbhtz" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -69,7 +70,7 @@
       <workItem from="1585263564005" duration="9986000" />
       <workItem from="1585285893198" duration="4764000" />
       <workItem from="1585428924087" duration="12548000" />
-      <workItem from="1585494459401" duration="13521000" />
+      <workItem from="1585494459401" duration="14879000" />
     </task>
     <servers />
   </component>

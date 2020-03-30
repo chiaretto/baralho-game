@@ -141,7 +141,7 @@ router.post('/embaralhar', function(req, res, next) {
     // Distribui as cartas
     jogadores.forEach((j) => {
       j.cartas = monte.splice(0, quantidade).sort();
-    })git 
+    })
 
     // Tirar Curinga
     curingas = monte.splice(0, 1)

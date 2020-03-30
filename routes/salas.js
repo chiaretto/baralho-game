@@ -94,20 +94,20 @@ router.get('/novaPartida', function(req, res, next) {
 })
 
 
-/* Dados completos dados da sala */
-router.get('/admin', function(req, res, next) {
-  res.json(
-      {
-        salaFechada: salaFechada,
-        curingas: curingas,
-        monte: monte,
-        quantidadeNonte: monte.length,
-        mesa: mesa,
-        quantidadeMesa: mesa.length,
-        jogadores: jogadores
-      }
-  )
-});
+// /* Dados completos dados da sala */
+// router.get('/admin', function(req, res, next) {
+//   res.json(
+//       {
+//         salaFechada: salaFechada,
+//         curingas: curingas,
+//         monte: monte,
+//         quantidadeNonte: monte.length,
+//         mesa: mesa,
+//         quantidadeMesa: mesa.length,
+//         jogadores: jogadores
+//       }
+//   )
+// });
 
 /* Embaralhar. */
 router.post('/embaralhar', function(req, res, next) {

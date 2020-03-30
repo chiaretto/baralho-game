@@ -2,13 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a525f85b-cbba-4e82-9ea0-5345c2f0b52e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/front/baralho/pm2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/baralho" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/baralho/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/baralho/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/baralho/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/baralho/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/baralho/src/App.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/salas.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/salas.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/babel.config.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/public/favicon.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/public/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/public/style.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/src/App.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/src/assets/logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/src/components/HelloWorld.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/front/src/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/baralho" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +40,9 @@
     <property name="restartRequiresConfirmation" value="false" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/front" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/public" />
       <recent name="$PROJECT_DIR$/routes" />
@@ -69,7 +78,7 @@
       <workItem from="1585263564005" duration="9986000" />
       <workItem from="1585285893198" duration="4764000" />
       <workItem from="1585428924087" duration="12548000" />
-      <workItem from="1585494459401" duration="15720000" />
+      <workItem from="1585494459401" duration="15893000" />
     </task>
     <servers />
   </component>
@@ -177,6 +186,10 @@
       <screen x="0" y="0" width="1920" height="1050" />
     </state>
     <state x="624" y="240" key="run.anything.popup/0.0.1920.1050/1920.0.1366.768@0.0.1920.1050" timestamp="1585271005872" />
+    <state x="685" y="364" width="540" height="314" key="vcs.readOnlyHandler.ReadOnlyStatusDialog" timestamp="1585531283966">
+      <screen x="0" y="0" width="1920" height="1050" />
+    </state>
+    <state x="685" y="364" width="540" height="314" key="vcs.readOnlyHandler.ReadOnlyStatusDialog/0.0.1920.1050/1920.0.1366.768@0.0.1920.1050" timestamp="1585531283966" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

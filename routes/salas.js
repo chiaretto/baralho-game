@@ -136,7 +136,8 @@ router.post('/embaralhar', function(req, res, next) {
     curingas = []
 
     // Embaralha e cria o monte
-    monte = Object.assign({}, (fullCards.sort(() => .5 - Math.random())))
+    monte = []
+    Object.assign(monte, fullCards.sort(() => .5 - Math.random()))
 
     // Distribui as cartas
     jogadores.forEach((j) => {

@@ -66,7 +66,7 @@
         name: 'App',
         data: function () {
             return {
-                host: 'http://localhost:3000',
+                host: '',
                 nome: null,
                 senha: null,
                 admin: false,

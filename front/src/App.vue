@@ -46,32 +46,12 @@
             </div>
         </div>
 
-        <div id="minhas">
+        <div v-if="estaLogado" id="minhas">
             <div class="hand grow">
                 <div title="Click para jogar a carta"
                      class="card" v-for="(item, index) in cartas" :key="index" @click="jogar(index, item)"
                      :class="classeMinhaCarta(item)">
                     <p>{{ extrairCarta(item) }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Modal title</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Modal body text goes here.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -86,7 +66,7 @@
         name: 'App',
         data: function () {
             return {
-                host: '',
+                host: 'http://localhost:3000',
                 nome: null,
                 senha: null,
                 admin: false,
@@ -207,8 +187,8 @@
             },
             possoJogar() {
                 let maiorNumeroDeCartasDaMesa = this.jogadores.reduce((p, n) => p.quantidadeCartas > n.quantidadeCartas ? p.quantidadeCartas : n.quantidadeCartas)
-                console.log(this.mesa.length, this.jogadores.length)
-                return this.cartas.length >= maiorNumeroDeCartasDaMesa && this.mesa.length < this.jogadores.length
+                console.log(this.mesa.length, this.jogadores.length, maiorNumeroDeCartasDaMesa.quantidadeCartas)
+                return this.cartas.length >= maiorNumeroDeCartasDaMesa.quantidadeCartas && this.mesa.length < this.jogadores.length
             },
             tenhoCuringa() {
                 if (this.curingas.length) {

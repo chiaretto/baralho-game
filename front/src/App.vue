@@ -187,8 +187,13 @@
             },
             possoJogar() {
                 let maiorNumeroDeCartasDaMesa = this.jogadores.reduce((p, n) => p.quantidadeCartas > n.quantidadeCartas ? p.quantidadeCartas : n.quantidadeCartas)
-                console.log(this.mesa.length, this.jogadores.length, maiorNumeroDeCartasDaMesa.quantidadeCartas)
-                return this.cartas.length >= maiorNumeroDeCartasDaMesa.quantidadeCartas && this.mesa.length < this.jogadores.length
+                if (maiorNumeroDeCartasDaMesa.quantidadeCartas === undefined) {
+                    maiorNumeroDeCartasDaMesa = maiorNumeroDeCartasDaMesa
+                } else {
+                    maiorNumeroDeCartasDaMesa = maiorNumeroDeCartasDaMesa.quantidadeCartas
+                }
+                console.log(this.mesa.length, this.jogadores.length, maiorNumeroDeCartasDaMesa)
+                return this.cartas.length >= maiorNumeroDeCartasDaMesa && this.mesa.length < this.jogadores.length
             },
             tenhoCuringa() {
                 if (this.curingas.length) {

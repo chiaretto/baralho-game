@@ -2,7 +2,9 @@
     <div id="app">
         <nav id="navbar-example" class="navbar navbar-light bg-light">
             <span id="curinga">
-                <div class="card" v-for="item in curingas" :key="item" :class="extrairNype(item)">
+                <div class="card" v-for="item in curingas" :key="item"
+                     :class="(quemTemPoe) ? 'quemTemPoe ' + extrairNype(item) : extrairNype(item)"
+                     >
                     <p>{{ extrairCarta(item) }}</p>
                 </div>
             </span>
@@ -33,7 +35,11 @@
 
         <div id="mesa">
             <div class="hand grow">
-                <div title="Click na carta vencedora" @click="setarGanhador(index)" class="card" v-for="(item, index) in mesa" :key="item" :class="extrairNype(item.carta)">
+                <div title="Click na carta vencedora"
+                     @click="setarGanhador(index)"
+                     class="card" v-for="(item, index) in mesa"
+                     :key="index"
+                     :class="(index === 0 && quemTemPoe) ? 'quemTemPoe ' + extrairNype(item.carta) : extrairNype(item.carta)">
                     <p>{{ extrairCarta(item.carta) }}</p>
                     <span>{{item.jogador}}</span>
                 </div>
@@ -42,7 +48,9 @@
 
         <div id="minhas">
             <div class="hand grow">
-                <div title="Click para jogar a carta" class="card" v-for="(item, index) in cartas" :key="item" @click="jogar(index)" :class="extrairNype(item)">
+                <div title="Click para jogar a carta"
+                     class="card" v-for="(item, index) in cartas" :key="index" @click="jogar(index, item)"
+                     :class="classeMinhaCarta(item)">
                     <p>{{ extrairCarta(item) }}</p>
                 </div>
             </div>
@@ -116,9 +124,23 @@
             },
             isDealer() {
                 return (this.dealer === true)
+            },
+            quemTemPoe() {
+                if (this.mesa.length && this.curingas.length) {
+                    return this.extrairNype(this.mesa[0].carta) === this.extrairNype(this.curingas[0])
+                } else {
+                    return false
+                }
             }
         },
         methods: {
+            minhaCartaECuringa(carta) {
+                if (this.curingas.length) {
+                    return this.extrairNype(carta) === this.extrairNype(this.curingas[0])
+                } else {
+                    return false
+                }
+            },
             extrairNype(carta) {
                 if (carta) {
                     let nype = carta.substr(0, 1) == '1' ? carta.substr(2, 1) : carta.substr(1, 1);
@@ -183,17 +205,54 @@
                     );
                 }
             },
-            jogar(index) {
-                axios.post(this.host + "/salas/jogar",
-                    {
-                        "posicaoCarta": index,
-                        "nome": this.nome,
-                        "senha": this.senha,
-                    }
-                ).then((response) => {
-                    this.sala()
-                    this.cartas = response.data.cartas
-                });
+            possoJogar() {
+                let maiorNumeroDeCartasDaMesa = this.jogadores.reduce((p, n) => p.quantidadeCartas > n.quantidadeCartas ? p.quantidadeCartas : n.quantidadeCartas)
+                console.log(this.mesa.length, this.jogadores.length)
+                return this.cartas.length >= maiorNumeroDeCartasDaMesa && this.mesa.length < this.jogadores.length
+            },
+            tenhoCuringa() {
+                if (this.curingas.length) {
+                    let curingas = this.cartas.filter((c) => this.extrairNype(c) === this.extrairNype(this.curingas[0]))
+                    return curingas.length > 0
+                } else {
+                    return false
+                }
+            },
+            classeMinhaCarta (carta) {
+                if (this.quemTemPoe && this.minhaCartaECuringa(carta) && this.possoJogar()) {
+                    return 'quemTemPoe ' + this.extrairNype(carta)
+                } else if (this.quemTemPoe && !this.minhaCartaECuringa(carta) && this.tenhoCuringa()) {
+                    return 'cartaBloqueada ' + this.extrairNype(carta)
+                } else if (this.quemTemPoe && !this.minhaCartaECuringa(carta) && !this.tenhoCuringa() && !this.possoJogar()) {
+                    return 'cartaBloqueada ' + this.extrairNype(carta)
+                } else if (this.quemTemPoe && this.minhaCartaECuringa(carta) && this.tenhoCuringa() && !this.possoJogar()) {
+                    return 'cartaBloqueada ' + this.extrairNype(carta)
+                } else if (!this.quemTemPoe && !this.possoJogar()) {
+                    return 'cartaBloqueada ' + this.extrairNype(carta)
+                } else {
+                  return this.extrairNype(carta)
+                }
+            },
+            cartaPermitida(carta) {
+                return (
+                    (this.quemTemPoe && this.minhaCartaECuringa(carta) && this.possoJogar()) ||
+                    (this.quemTemPoe && !this.minhaCartaECuringa(carta) && !this.tenhoCuringa() && this.possoJogar()) ||
+                    !this.quemTemPoe && this.possoJogar()
+                )
+            },
+            jogar(index, carta) {
+                if (this.cartaPermitida(carta)) {
+                    axios.post(this.host + "/salas/jogar",
+                        {
+                            "posicaoCarta": index,
+                            "nome": this.nome,
+                            "senha": this.senha,
+                        }
+                    ).then((response) => {
+                        this.sala()
+                        this.cartas = response.data.cartas
+                    });
+                }
             },
             setarGanhador(index) {
                 if (this.admin) {
@@ -219,11 +278,13 @@
             sala() {
                 axios.get(this.host + "/salas")
                     .then((response) => {
-                        if (this.mesa.length != response.data.mesa.length) {
-                            this.mesa = response.data.mesa;
+                        if (response.data && response.data.mesa) {
+                            if (this.mesa.length !== response.data.mesa.length) {
+                                this.mesa = response.data.mesa;
+                            }
+                            this.jogadores = response.data.jogadores;
+                            this.curingas = response.data.curingas
                         }
-                        this.jogadores = response.data.jogadores;
-                        this.curingas = response.data.curingas
                     })
             },
             novaRodada() {
@@ -272,6 +333,26 @@
 
     #mesa .card {
         text-align: center;
+    }
+
+    .cartaBloqueada {
+        opacity: .5;
+        cursor: not-allowed !important;
+    }
+
+    .quemTemPoe {
+        -webkit-animation: quemTemPoe 1s ease-in-out infinite alternate;
+        -moz-animation: quemTemPoe 1s ease-in-out infinite alternate;
+        animation: quemTemPoe 1s ease-in-out infinite alternate;
+    }
+
+    @-webkit-keyframes quemTemPoe {
+        from {
+            box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #e60073, 0 0 20px #e60073, 0 0 25px #e60073, 0 0 30px #e60073, 0 0 35px #e60073;
+        }
+        to {
+            box-shadow: 0 0 10px #fff, 0 0 15px #ff4da6, 0 0 20px #ff4da6, 0 0 25px #ff4da6, 0 0 30px #ff4da6, 0 0 70px #ff4da6, 0 0 40px #ff4da6;
+        }
     }
 
     #mesa span {

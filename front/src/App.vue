@@ -66,7 +66,7 @@
         name: 'App',
         data: function () {
             return {
-                host: 'http://192.168.100.22:3000',
+                host: '',
                 nome: null,
                 senha: null,
                 admin: false,

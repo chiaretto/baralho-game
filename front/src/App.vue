@@ -66,7 +66,7 @@
         name: 'App',
         data: function () {
             return {
-                host: '',
+                host: 'http://192.168.100.22:3000',
                 nome: null,
                 senha: null,
                 admin: false,
@@ -187,9 +187,7 @@
             },
             possoJogar() {
                 let maiorNumeroDeCartasDaMesa = this.jogadores.reduce((p, n) => p.quantidadeCartas > n.quantidadeCartas ? p.quantidadeCartas : n.quantidadeCartas)
-                if (maiorNumeroDeCartasDaMesa.quantidadeCartas === undefined) {
-                    maiorNumeroDeCartasDaMesa = maiorNumeroDeCartasDaMesa
-                } else {
+                if (maiorNumeroDeCartasDaMesa.quantidadeCartas !== undefined) {
                     maiorNumeroDeCartasDaMesa = maiorNumeroDeCartasDaMesa.quantidadeCartas
                 }
                 console.log(this.mesa.length, this.jogadores.length, maiorNumeroDeCartasDaMesa)
@@ -294,6 +292,12 @@
 </script>
 
 <style>
+    @media only screen and (max-width: 1200px) {
+        body {
+           zoom: 50%;
+        }
+    }
+
     #app {
         margin-top: 100px;
     }

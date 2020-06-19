@@ -39,7 +39,7 @@
                      @click="setarGanhador(index)"
                      class="card" v-for="(item, index) in mesa"
                      :key="index"
-                     :class="(index === 0 && quemTemPoe) ? 'quemTemPoe ' + extrairNype(item.carta) : extrairNype(item.carta)">
+                     :class="classeCarta(index, item)">
                     <p>{{ extrairCarta(item.carta) }}</p>
                     <span>{{item.jogador}}</span>
                 </div>
@@ -66,6 +66,8 @@
         name: 'App',
         data: function () {
             return {
+                // host: 'https://baralho-game.herokuapp.com',
+                // host: 'http://localhost',
                 host: '',
                 nome: null,
                 senha: null,
@@ -216,6 +218,15 @@
                   return this.extrairNype(carta)
                 }
             },
+            classeCarta (index, item) {
+                if (this.extrairNype(item.carta) === this.extrairNype(this.curingas[0]) && this.extrairCarta(item.carta) === this.extrairCarta(this.curingas[0])) {
+                    return 'quemTemPoeMaster ' + this.extrairNype(item.carta)
+                } else if (this.extrairNype(item.carta) === this.extrairNype(this.curingas[0])) {
+                    return 'quemTemPoe ' + this.extrairNype(item.carta)
+                } else {
+                    return this.extrairNype(item.carta)
+                }
+            },
             cartaPermitida(carta) {
                 return (
                     (this.quemTemPoe && this.minhaCartaECuringa(carta) && this.possoJogar()) ||
@@ -341,6 +352,21 @@
         }
         to {
             box-shadow: 0 0 10px #fff, 0 0 15px #ff4da6, 0 0 20px #ff4da6, 0 0 25px #ff4da6, 0 0 30px #ff4da6, 0 0 70px #ff4da6, 0 0 40px #ff4da6;
+        }
+    }
+
+    .quemTemPoeMaster {
+        -webkit-animation: quemTemPoeMaster 1s ease-in-out infinite alternate;
+        -moz-animation: quemTemPoeMaster 1s ease-in-out infinite alternate;
+        animation: quemTemPoeMaster 1s ease-in-out infinite alternate;
+    }
+
+    @-webkit-keyframes quemTemPoeMaster {
+        from {
+            box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #e6950c, 0 0 20px #e6950c, 0 0 25px #e6950c, 0 0 30px #e6950c, 0 0 35px #e6950c;
+        }
+        to {
+            box-shadow: 0 0 10px #fff, 0 0 15px #ffd07d, 0 0 20px #ffd07d, 0 0 25px #ffd07d, 0 0 30px #ffd07d, 0 0 70px #ffd07d, 0 0 40px #ffd07d;
         }
     }
 

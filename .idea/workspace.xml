@@ -2,7 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a525f85b-cbba-4e82-9ea0-5345c2f0b52e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/front/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/css/app.c28e5111.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/app.bf3be0e3.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/app.bf3be0e3.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/chunk-vendors.a4694aeb.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/js/chunk-vendors.a4694aeb.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/style.css" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

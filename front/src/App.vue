@@ -11,7 +11,7 @@
             <span id="jogadores">
                 <div class="jogador" :title="item.admin ? 'Admin' : ''" :class="item.dealer ? 'dealer' : ''" v-for="item in jogadores" :key="item.nome">
                     <span class="foto">
-                        <img :src="'https://api.adorable.io/avatars/60/'+item.nome+'.png'" alt="">
+                        <img :src="'https://avatars.dicebear.com/api/bottts/'+item.nome+'.png'" alt="">
                     </span>
                     <span class="nome" :class="item.admin ? 'admin' : ''">{{ item.nome }}</span>
                     <span title="Quantidade cartas" class="qtdCartas badge" :class="'cor-'+item.quantidadeCartas">{{ item.quantidadeCartas }}</span>

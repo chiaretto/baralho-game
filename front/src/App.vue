@@ -16,7 +16,7 @@
                     <span class="nome" :class="item.admin ? 'admin' : ''">{{ item.nome }}</span>
                     <span title="Quantidade cartas" class="qtdCartas badge" :class="'cor-'+item.quantidadeCartas">{{ item.quantidadeCartas }}</span>
                     <span title="Vitorias" class="qtdPontos badge badge-dark">{{ item.pontosRodada }}pts</span>
-                    <span class="removerJogador" @click="removerJogador(index)" v-if="isAdmin && !item.admin">Remover {{index}}</span>
+                    <span class="removerJogador" @click="removerJogador(index)" v-if="isAdmin && !item.admin">Remover</span>
                 </div>
             </span>
 

@@ -178,6 +178,15 @@ router.post('/setarGanhador', function(req, res, next) {
   res.json()
 });
 
+/* Setar ganhador da rodada. */
+router.post('/removerJogador', function(req, res, next) {
+  const posicaoJogadorRemovido = req.body.posicaoJogadorRemovido;
+
+  jogadores.splice(posicaoJogadorRemovido, 1)
+
+  res.json()
+});
+
 /* Novo jogador. */
 router.post('/entrar', function(req, res, next) {
   const nome = req.body.nome;
@@ -210,17 +219,29 @@ router.post('/sair', function(req, res, next) {
   res.json()
 });
 
-/* Sair jogador. */
+/* Virar Admin. */
 router.post('/virarAdmin', function(req, res, next) {
   const nome = req.body.nome;
   const senha = req.body.senha;
 
-  // Setar jogador como dealer
+  // Setar jogador como admin
   jogadores.forEach((j) => {
     j.admin = false
   })
   let jogador = identificarJogador(nome, senha)
   jogador.admin = true
+
+  res.json()
+});
+
+/* Largar Admin. */
+router.post('/largarAdmin', function(req, res, next) {
+  const nome = req.body.nome;
+  const senha = req.body.senha;
+
+  // Setar admin como jogador
+  let jogador = identificarJogador(nome, senha)
+  jogador.admin = false
 
   res.json()
 });

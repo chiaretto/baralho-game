@@ -9,13 +9,14 @@
                 </div>
             </span>
             <span id="jogadores">
-                <div class="jogador" :title="item.admin ? 'Admin' : ''" :class="item.dealer ? 'dealer' : ''" v-for="item in jogadores" :key="item.nome">
+                <div class="jogador" :title="item.admin ? 'Admin' : ''" :class="item.dealer ? 'dealer' : ''" v-for="(item, index) in jogadores" :key="item.nome">
                     <span class="foto">
                         <img :src="'https://avatars.dicebear.com/api/bottts/'+item.nome+'.png'" alt="">
                     </span>
                     <span class="nome" :class="item.admin ? 'admin' : ''">{{ item.nome }}</span>
                     <span title="Quantidade cartas" class="qtdCartas badge" :class="'cor-'+item.quantidadeCartas">{{ item.quantidadeCartas }}</span>
-                    <span title="Vitorias" class="qtdPontos badge badge-dark">{{ item.pontosRodada }}</span>
+                    <span title="Vitorias" class="qtdPontos badge badge-dark">{{ item.pontosRodada }}pts</span>
+                    <span class="removerJogador" @click="removerJogador(index)" v-if="isAdmin && !item.admin">Remover {{index}}</span>
                 </div>
             </span>
 
@@ -25,6 +26,7 @@
                 </li>
                 <li class="nav-item">
                     <input v-if="estaLogado && !existeAdmin" @click="virarAdmin()" class="btn btn-sm btn-warning" type="button" value="Virar Admin">
+                    <input v-if="estaLogado && existeAdmin && this.isAdmin" @click="largarAdmin()" class="btn btn-sm btn-warning" type="button" value="Largar Admin">
                 </li>
                 <li class="nav-item">
                     <button v-if="!estaLogado"  @click="entrar()" type="button" class="btn btn-sm btn-primary">Entrar</button>
@@ -67,7 +69,7 @@
         data: function () {
             return {
                 // host: 'https://baralho-game.herokuapp.com',
-                // host: 'http://localhost',
+                // host: 'http://localhost:3000', // Para executar local use essa porta
                 host: '',
                 nome: null,
                 senha: null,
@@ -77,7 +79,12 @@
                 mesa: [],
                 curingas: [],
                 jogadores: [],
-                cartas: []
+                cartas: [],
+                jogando: false,
+                setandoGanhador: false,
+                virandoAdmin: false,
+                largandoAdmin: false,
+                removendoJogador: false,
             }
         },
         components: {},
@@ -235,39 +242,65 @@
                 )
             },
             jogar(index, carta) {
-                if (this.cartaPermitida(carta)) {
+                if (this.jogando !== true) {
+                  if (this.cartaPermitida(carta)) {
+                    this.jogando = true
                     axios.post(this.host + "/salas/jogar",
                         {
-                            "posicaoCarta": index,
-                            "nome": this.nome,
-                            "senha": this.senha,
+                          "posicaoCarta": index,
+                          "nome": this.nome,
+                          "senha": this.senha,
                         }
                     ).then((response) => {
-                        this.sala()
-                        this.cartas = response.data.cartas
+                      this.sala()
+                      this.cartas = response.data.cartas
+                      this.jogando = false
                     });
+                  }
                 }
             },
             setarGanhador(index) {
+              if (this.setandoGanhador !== true) {
                 if (this.admin) {
-                    axios.post(this.host + "/salas/setarGanhador",
-                        {
-                            "posicaoCartaVencedora": index
-                        }
-                    ).then(() => {
-                        this.sala()
-                    });
+                  this.setandoGanhador = true
+                  axios.post(this.host + "/salas/setarGanhador",
+                      {
+                        "posicaoCartaVencedora": index
+                      }
+                  ).then(() => {
+                    this.sala()
+                    this.setandoGanhador = false
+                  });
                 }
+              }
             },
             virarAdmin() {
-                axios.post(this.host + "/salas/virarAdmin",
-                    {
+                if (this.virandoAdmin !== true) {
+                  this.virandoAdmin = true
+                  axios.post(this.host + "/salas/virarAdmin",
+                      {
                         "nome": this.nome,
                         "senha": this.senha,
-                    }
-                ).then(() => {
+                      }
+                  ).then(() => {
                     this.sala()
-                });
+                    this.virandoAdmin = false
+                  });
+                }
+            },
+            largarAdmin() {
+                if (this.largandoAdmin !== true) {
+                  this.largandoAdmin = true
+                  axios.post(this.host + "/salas/largarAdmin",
+                      {
+                        "nome": this.nome,
+                        "senha": this.senha,
+                      }
+                  ).then(() => {
+                    this.sala()
+                    this.largandoAdmin = false
+                  });
+                }
             },
             sala() {
                 axios.get(this.host + "/salas")
@@ -283,6 +316,21 @@
             },
             novaRodada() {
                 axios.post(this.host + "/salas/novaRodada")
+            },
+            removerJogador(index) {
+              if (this.removendoJogador !== true) {
+                if (this.admin) {
+                  this.removendoJogador = true
+                  axios.post(this.host + "/salas/removerJogador",
+                      {
+                        "posicaoJogadorRemovido": index
+                      }
+                  ).then(() => {
+                    this.sala()
+                    this.removendoJogador = false
+                  });
+                }
+              }
             },
             getCartas() {
                 if (this.nome != null && this.senha != null) {
@@ -419,19 +467,36 @@
         position: absolute;
         top: 0;
         left: -12px;
+        display: none;
     }
     .jogador .qtdPontos{
         position: absolute;
         top: 0;
-        right: -12px;
+        right: -30px;
+        font-size: 100%;
     }
 
-    .dealer img{
-        border: 4px solid #FFF;
+    .dealer {
+        border: 4px solid #ffffff70;
+        background-color: #ffffff70;
+        border-radius: 15px;
+        padding: 0 5px;
     }
 
     .admin {
 
+    }
+
+    .removerJogador {
+      /*position: absolute;*/
+      /*bottom: 0;*/
+      /*right: -23px;*/
+      font-size: 80%;
+      padding: 0 5px;
+      cursor: pointer;
+      border: 1px solid #ef9696;
+      border-radius: 15px;
+      background-color: #eba7a7;
     }
 
     .cor-1 {

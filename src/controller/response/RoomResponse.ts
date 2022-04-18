@@ -11,7 +11,7 @@ export class RoomResponse {
 
   constructor(room: Room) {
     this.salaFechada = room.closed;
-    this.curingas = [room.curinga];
+    this.curingas = room.curinga ? [room.curinga] : [];
 
     this.mesa = room.desk
       .getCurrentCards()

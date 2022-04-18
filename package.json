@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "npx tsc && node dist/app.js",
+    "start": "npm run build --prefix front && npx tsc && node dist/app.js",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/app.js\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint --ext .tsx,.ts ."

@@ -1,4 +1,4 @@
-import { Player } from "./Player";
+import { Player } from './Player';
 
 export class Desk {
   private cards: DeskItem[];
@@ -28,7 +28,7 @@ export class Desk {
   }
 }
 
-class DeskItem {
+export class DeskItem {
   card: string;
   player: Player;
 

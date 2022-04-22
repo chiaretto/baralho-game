@@ -77,7 +77,7 @@ class RoomController {
 
   public newRound(req: Request, res: Response) {
     const room = repository.currentRoom;
-    room.newRound();
+    //room.newRound();
     res.json(new RoomResponse(room));
   }
 

@@ -1,3 +1,4 @@
+import { Desk } from '../../domain/Desk';
 import { Room } from '../../domain/Room';
 import { RoomDeskItemResponse } from './RoomDesktemResponse';
 import { RoomPlayerResponse } from './RoomPlayerResponse';
@@ -11,12 +12,14 @@ export class RoomResponse {
 
   constructor(room: Room) {
     this.salaFechada = room.closed;
-    this.curingas = room.wildcard ? [room.wildcard] : [];
+    this.curingas = room.getWildCard() ? [room.getWildCard() ?? ''] : [];
 
-    this.mesa = room.desk
+    const desk = room.currentGame ? room.currentGame.getCurrentRound() : new Desk();
+
+    this.mesa = desk
       .getCurrentCards()
       .map((item) => new RoomDeskItemResponse(item.player, item.card));
-    this.quantidadeMesa = room.desk.length();
+    this.quantidadeMesa = desk.length();
 
     this.jogadores = room.players.map((p) => new RoomPlayerResponse(p, room.currentPlayer));
   }

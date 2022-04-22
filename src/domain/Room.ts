@@ -1,46 +1,29 @@
-import { Deck } from './Deck';
-import { Desk } from './Desk';
+import { Game } from './Game';
 import { Player } from './Player';
 
 export class Room {
   closed: boolean;
-  desk: Desk;
+  gameHistory: Game[];
+  currentGame: Game | undefined;
   players: Player[];
-  wildcard: string;
   currentPlayer: Player | undefined;
 
   constructor() {
     this.closed = false;
-    this.desk = new Desk();
+    this.gameHistory = [];
     this.players = [];
-    this.wildcard = '';
+    this.currentGame = undefined;
     this.currentPlayer = undefined;
   }
 
-  scramble(dealer: Player, quantidade: number) {    
-    const scrambledDeck = Deck.getScrambled();
-
+  scramble(dealer: Player, quantity: number) {        
     // Limpa jogadores
     this.players.forEach((j) => {
       j.reset();
     });
 
-    // Seta dealer
-    dealer.dealer = true;
-
     // Limpa Mesa
-    this.clearDesk();
-
-    // Limpa Curinga
-    this.wildcard = '';
-
-    // Distribui as cartas
-    this.players.forEach((j) => {
-      j.cards = scrambledDeck.splice(0, quantidade).sort();
-    });
-
-    // Tirar Curinga
-    this.wildcard = scrambledDeck.splice(0, 1)[0];
+    this.newGame(dealer, quantity);
 
     // muda o proximo jogador para o primeiro depois do dealer
     this.currentPlayer = dealer;
@@ -48,33 +31,10 @@ export class Room {
   }
 
   setCurrentWinnerByDeskPosition(deskPosition: number): Player | undefined {
-    // só permite setar ganhador quanto todos tiverem jogado na mesa
-    if (!(this.desk.length() === this.players.length)) {
-      console.log("Desk length != players.length");
-      return undefined;
-    }
-    
-    // verifica se todos os jogadores da mesa jogaram    
-    const playersNotPlayed = this.players.filter((p) => this.desk.getPlayedCard(p) === undefined);
-    if (playersNotPlayed.length > 0) {
-      console.log("Players not played: " + playersNotPlayed.length);
-      return undefined;
-    }
+    const winner = this.getRequiredGame().setCurrentWinner(deskPosition);
+    this.currentPlayer = winner;
 
-    const winnerDeskItem = this.desk.getDeskItemByPosition(deskPosition);
-
-    // identifica jogador da carta vencedora e soma ponto
-    //const player = Player.findPlayerByName(this.players, playerName);
-    const player = winnerDeskItem.player;
-    if (player) {
-      player.currentScore += 1;
-    }
-
-    // prepara para proxima rodada (limpa a mesa e proximo jogador para o vencedor)
-    this.newRound();
-    this.currentPlayer = player;
-
-    return player;
+    return winner;
   }
 
   removePlayerByPosition(playerPosition: number): Player | undefined {
@@ -119,21 +79,17 @@ export class Room {
   playCard(player: Player, playerCardPosition: number): string[] {
     if (this.currentPlayer == player) {
       const card = player.removeCardFromPosition(playerCardPosition);
-      this.desk.playCard(player, card);
+      this.getRequiredGame().playCard(player, card);
       this.rotatePlayer();
     }
     return player.cards;
   }
 
-  newRound() {
-    this.clearDesk();
-  }
-
   reboot() {
     this.closed = false;
-    this.wildcard = '';
     this.players = [];
-    this.clearDesk();
+    this.gameHistory = [];
+    this.currentGame = undefined;
     this.currentPlayer = undefined;
   }
 
@@ -142,8 +98,18 @@ export class Room {
     return Player.findPlayerByNameAndId(this.players, name, id);
   }
 
-  private clearDesk() {
-    this.desk = new Desk();
+  getWildCard() : string | undefined {
+    return this.currentGame?.getWildCard();
+  }
+
+  private getRequiredGame() : Game {
+    if (this.currentGame) return this.currentGame;
+    throw Error('Game has not been started');
+  }
+
+  private newGame(dealer: Player, quantity: number) {
+    this.currentGame = new Game(dealer, this.players, quantity);
+    this.gameHistory.push(this.currentGame);
   }
 
   private buildPlayerId(name: string, passwd: string): string {
@@ -167,10 +133,11 @@ export class Room {
   }
 
   private nextPlayerPosition(position: number) : number {
-    var nextPlayerPosition = position+1;
+    let nextPlayerPosition = position + 1;
     if (nextPlayerPosition >= this.players.length) {
       nextPlayerPosition = nextPlayerPosition % this.players.length;
     }
     return nextPlayerPosition;
   }
+
 }

@@ -1,4 +1,4 @@
-import { Player } from "../../domain/Player";
+import { Player } from '../../domain/Player';
 
 export class RoomDeskItemResponse {
   carta: string;

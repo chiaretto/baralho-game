@@ -4,9 +4,10 @@ import { Player } from './Player';
 export class Room {
   closed: boolean;
   gameHistory: Game[];
-  currentGame: Game | undefined;
   players: Player[];
+  currentGame: Game | undefined;
   currentPlayer: Player | undefined;
+  currentAdmin: Player | undefined;
 
   constructor() {
     this.closed = false;
@@ -16,11 +17,8 @@ export class Room {
     this.currentPlayer = undefined;
   }
 
-  scramble(dealer: Player, quantity: number) {        
-    // Limpa jogadores
-    this.players.forEach((j) => {
-      j.reset();
-    });
+  scramble(dealer: Player, quantity: number) {
+    this.players.forEach((p) => p.fullScore += this.currentGame?.calculateScore(p) ?? 0);
 
     // Limpa Mesa
     this.newGame(dealer, quantity);
@@ -28,13 +26,17 @@ export class Room {
     // muda o proximo jogador para o primeiro depois do dealer
     this.currentPlayer = dealer;
     this.rotatePlayer();
+    this.closed = true;
   }
 
   setCurrentWinnerByDeskPosition(deskPosition: number): Player | undefined {
     const winner = this.getRequiredGame().setCurrentWinner(deskPosition);
-    this.currentPlayer = winner;
+    this.currentPlayer = winner?.player;
 
-    return winner;
+    if (winner && winner.cards.length == 0) {
+      this.closed = false;
+    }
+    return this.currentPlayer;
   }
 
   removePlayerByPosition(playerPosition: number): Player | undefined {
@@ -65,24 +67,22 @@ export class Room {
     }
     this.players = this.players.filter((j) => {
       return j != player;
-    });    
+    });
+    this.currentGame?.leave(player);
   }
 
   changeAdmin(jogador: Player, isAdmin: boolean) {
     // Setar jogador como admin
-    this.players.forEach((j) => {
-      j.admin = false;
-    });
-    jogador.admin = isAdmin;
+    this.currentAdmin = isAdmin ? jogador : undefined;
   }
 
   playCard(player: Player, playerCardPosition: number): string[] {
-    if (this.currentPlayer == player) {
-      const card = player.removeCardFromPosition(playerCardPosition);
-      this.getRequiredGame().playCard(player, card);
+    const gamePlayer = this.getRequiredGame().findGamePlayer(player);
+    if (gamePlayer && this.currentPlayer == player) {      
+      this.getRequiredGame().playCard(gamePlayer, playerCardPosition);
       this.rotatePlayer();
     }
-    return player.cards;
+    return gamePlayer?.cards ?? [];
   }
 
   reboot() {

@@ -1,4 +1,4 @@
-import { Player } from './Player';
+import { GamePlayer } from './GamePlayer';
 
 export class Desk {
   private cards: DeskItem[];
@@ -15,7 +15,7 @@ export class Desk {
     return this.cards.slice(position, position + 1)[0];
   }
 
-  playCard(player: Player, card: string) {
+  playCard(player: GamePlayer, card: string) {
     this.cards.push(new DeskItem(card, player));
   }
 
@@ -23,16 +23,16 @@ export class Desk {
     return this.cards;
   }
 
-  getPlayedCard(player: Player) : DeskItem | undefined {
+  getPlayedCard(player: GamePlayer) : DeskItem | undefined {
     return this.cards.find((di) => di.player === player);
   }
 }
 
 export class DeskItem {
   card: string;
-  player: Player;
+  player: GamePlayer;
 
-  constructor(card: string, player: Player) {
+  constructor(card: string, player: GamePlayer) {
     this.card = card;
     this.player = player;
   }

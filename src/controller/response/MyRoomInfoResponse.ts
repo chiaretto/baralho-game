@@ -1,4 +1,5 @@
 import { Player } from '../../domain/Player';
+import { Room } from '../../domain/Room';
 
 export class MyRoomInfoResponse {
   nome: string;
@@ -7,11 +8,12 @@ export class MyRoomInfoResponse {
   admin: boolean;
   jogadorAtual: boolean;
 
-  constructor(player: Player, currentPlayer: Player | undefined) {
+  constructor(player: Player, room: Room) {
     this.nome = player.name;
-    this.cartas = player.cards;
-    this.dealer = player.dealer;
-    this.admin = player.admin;
-    this.jogadorAtual = player === currentPlayer;
+    this.admin = player === room.currentAdmin;
+    this.jogadorAtual = player === room.currentPlayer;
+
+    this.dealer = player === room.currentGame?.getDealer();
+    this.cartas = room.currentGame?.findGamePlayer(player)?.cards ?? [];
   }
 }

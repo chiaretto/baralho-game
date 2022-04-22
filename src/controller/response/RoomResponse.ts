@@ -21,6 +21,6 @@ export class RoomResponse {
       .map((item) => new RoomDeskItemResponse(item.player, item.card));
     this.quantidadeMesa = desk.length();
 
-    this.jogadores = room.players.map((p) => new RoomPlayerResponse(p, room.currentPlayer));
+    this.jogadores = room.players.map((p) => new RoomPlayerResponse(p, room)) ?? [];
   }
 }

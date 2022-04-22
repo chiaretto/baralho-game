@@ -1,4 +1,5 @@
 import { Player } from '../../domain/Player';
+import { Room } from '../../domain/Room';
 
 export class RoomPlayerResponse {
   nome: string;
@@ -9,13 +10,17 @@ export class RoomPlayerResponse {
   admin: boolean;
   jogadorAtual: boolean;
 
-  constructor(player: Player, currentPlayer: Player | undefined) {
+  constructor(player: Player, room: Room) {
     this.nome = player.name;
-    this.quantidadeCartas = player.cards.length;
-    this.pontosRodada = player.currentScore;
-    this.previsaoRodada = player.currentForecast;
-    this.dealer = player.dealer;
-    this.admin = player.admin;
-    this.jogadorAtual = player === currentPlayer;
+    this.admin = player === room.currentAdmin;
+    this.jogadorAtual = player === room.currentPlayer;
+
+    const gamePlayer = room.currentGame?.findGamePlayer(player);
+    const cards = gamePlayer?.cards ?? [];
+
+    this.quantidadeCartas = cards.length;
+    this.pontosRodada = gamePlayer?.score ?? 0;
+    this.previsaoRodada = gamePlayer?.forecast ?? 0;
+    this.dealer = player === room.currentGame?.getDealer();
   }
 }

@@ -66,7 +66,7 @@ class RoomPlayerController {
 
     res.json({
       player: player?.name,
-      isAdmin: player?.admin,
+      isAdmin: player === room.currentAdmin,
     });
   }
 
@@ -82,7 +82,7 @@ class RoomPlayerController {
 
     res.json({
       player: player?.name,
-      isAdmin: player?.admin,
+      isAdmin: player === room.currentAdmin,
     });
   }
 
@@ -93,7 +93,7 @@ class RoomPlayerController {
     const player = room.findRoomPlayer(body.nome, body.senha);
 
     if (player) {
-      res.json(new MyRoomInfoResponse(player, room.currentPlayer));
+      res.json(new MyRoomInfoResponse(player, room));
     } else {
       res.json();
     }

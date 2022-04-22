@@ -93,7 +93,7 @@ class RoomPlayerController {
     const player = room.findRoomPlayer(body.nome, body.senha);
 
     if (player) {
-      res.json(new MyRoomInfoResponse(player));
+      res.json(new MyRoomInfoResponse(player, room.currentPlayer));
     } else {
       res.json();
     }

@@ -199,8 +199,12 @@
                 if (maiorNumeroDeCartasDaMesa.quantidadeCartas !== undefined) {
                     maiorNumeroDeCartasDaMesa = maiorNumeroDeCartasDaMesa.quantidadeCartas
                 }
-                console.log(this.mesa.length, this.jogadores.length, maiorNumeroDeCartasDaMesa)
-                return this.cartas.length >= maiorNumeroDeCartasDaMesa && this.mesa.length < this.jogadores.length
+                //console.log("Can I play? " + this.mesa.length, this.jogadores.length, maiorNumeroDeCartasDaMesa)
+                let firstCheck = this.cartas.length >= maiorNumeroDeCartasDaMesa && this.mesa.length < this.jogadores.length
+                if (firstCheck) {
+                    return this.jogadorAtual
+                }
+                return false;
             },
             tenhoCuringa() {
                 if (this.curingas.length) {
@@ -343,6 +347,7 @@
                             this.cartas = response.data.cartas
                             this.dealer = response.data.dealer
                             this.admin = response.data.admin
+                            this.jogadorAtual = response.data.jogadorAtual
                         })
                 }
             }

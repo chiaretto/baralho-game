@@ -22,6 +22,10 @@ export class Desk {
   getCurrentCards(): DeskItem[] {
     return this.cards;
   }
+
+  getPlayedCard(player: Player) : DeskItem | undefined {
+    return this.cards.find((di) => di.player === player);
+  }
 }
 
 class DeskItem {

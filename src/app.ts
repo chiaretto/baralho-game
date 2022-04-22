@@ -9,7 +9,9 @@ import { roomRouter } from './router/RoomRouter';
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(logger('dev'));
+app.use(logger('dev', {
+  skip: function(req, res) { return res.statusCode < 400 }
+}));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 

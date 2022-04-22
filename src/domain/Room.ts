@@ -85,7 +85,13 @@ export class Room {
     return undefined;
   }
 
-  join(name: string, passwd: string): Player {
+  join(name: string, passwd: string): Player | undefined {
+    const oldPlayer = Player.findPlayerByName(this.players, name);
+    if (oldPlayer) {
+      console.log('There is already a player named: ' + name);
+      return undefined;
+    }
+
     const id = this.buildPlayerId(name, passwd);
     const newPlayer = new Player(id, name);
     this.players.push(newPlayer);

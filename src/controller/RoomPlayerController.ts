@@ -20,10 +20,10 @@ class RoomPlayerController {
 
     const room = repository.currentRoom;
 
-    if (!room.closed) {
+    if (!room.closed) {      
       const newPlayer = room.join(body.nome, pwd);
-
-      res.json(new NewPlayerResponse(newPlayer, pwd));
+      if (newPlayer)
+        res.json(new NewPlayerResponse(newPlayer, pwd));
     }
   }
 

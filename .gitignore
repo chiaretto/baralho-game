@@ -120,4 +120,4 @@ dist
 .pnp.*
 
 .DS_Store
-
+public/

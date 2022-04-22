@@ -31,7 +31,7 @@ export class Deck {
     })
     .reduce((a, b) => a.concat(b), []);
 
-  getScrambled(): string[] {
+  public static getScrambled(): string[] {
     const newDeck = [...Deck.fullCards];
     return newDeck.sort(() => 0.5 - Math.random());
   }

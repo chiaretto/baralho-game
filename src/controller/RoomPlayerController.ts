@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { repository, Repository } from '../database/Repository';
+import { repository } from '../database/Repository';
 import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
 import { NewPlayerResponse } from './response/NewPlayerResponse';
 
@@ -13,19 +13,11 @@ interface PlayerRequest {
 }
 
 class RoomPlayerController {
-  private repository: Repository;
-
-  constructor(repository: Repository) {
-    this.repository = repository;
-    console.log('my repository ' + this.repository);
-  }
 
   public join(req: Request, res: Response) {
     const body: JoinRequest = req.body;
-
     const pwd = (Math.random() + Math.random()).toString();
 
-    console.log('this at join' + repository);
     const room = repository.currentRoom;
 
     if (!room.closed) {
@@ -39,7 +31,6 @@ class RoomPlayerController {
     const body: PlayerRequest = req.body;
 
     const room = repository.currentRoom;
-
     const player = room.findRoomPlayer(body.nome, body.senha);
 
     if (player) {
@@ -107,8 +98,9 @@ class RoomPlayerController {
       res.json();
     }
   }
+
 }
 
-const roomPlayerController = new RoomPlayerController(repository);
+const roomPlayerController = new RoomPlayerController();
 
 export { roomPlayerController };

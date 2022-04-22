@@ -1,9 +1,11 @@
+import { Player } from "../../domain/Player";
+
 export class RoomDeskItemResponse {
   carta: string;
   jogador: string;
 
-  constructor(carta: string, jogador: string) {
-    this.carta = carta;
-    this.jogador = jogador;
+  constructor(player: Player, card: string) {
+    this.carta = card;
+    this.jogador = player.name;
   }
 }

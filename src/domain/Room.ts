@@ -5,22 +5,21 @@ import { Player } from './Player';
 export class Room {
   closed: boolean;
   desk: Desk;
-  jogadores: Player[];
-  curinga: string;
+  players: Player[];
+  wildcard: string;
 
   constructor() {
     this.closed = false;
     this.desk = new Desk();
-    this.jogadores = [];
-    this.curinga = '';
+    this.players = [];
+    this.wildcard = '';
   }
 
-  scramble(dealer: Player, quantidade: number) {
-    const d = new Deck();
-    const scrambledDeck = d.getScrambled();
+  scramble(dealer: Player, quantidade: number) {    
+    const scrambledDeck = Deck.getScrambled();
 
     // Limpa jogadores
-    this.jogadores.forEach((j) => {
+    this.players.forEach((j) => {
       j.reset();
     });
 
@@ -28,41 +27,41 @@ export class Room {
     dealer.dealer = true;
 
     // Limpa Mesa
-    this.desk = new Desk();
+    this.clearDesk();
 
     // Limpa Curinga
-    this.curinga = '';
+    this.wildcard = '';
 
     // Distribui as cartas
-    this.jogadores.forEach((j) => {
+    this.players.forEach((j) => {
       j.cards = scrambledDeck.splice(0, quantidade).sort();
     });
 
     // Tirar Curinga
-    this.curinga = scrambledDeck.splice(0, 1)[0];
+    this.wildcard = scrambledDeck.splice(0, 1)[0];
   }
 
   setCurrentWinnerByDeskPosition(deskPosition: number): Player | undefined {
     // só permite setar ganhador quanto todos tiverem jogado na mesa
-    if (!(this.desk.length() === this.jogadores.length)) return;
+    if (!(this.desk.length() === this.players.length)) return;
 
-    const cartaVencedora = this.desk.getCardByPosition(deskPosition);
-    const playerName = cartaVencedora[0].playerName;
+    const winnerDeskItem = this.desk.getDeskItemByPosition(deskPosition);
 
     // identifica jogador da carta vencedora e soma ponto
-    const player = Player.findPlayerByName(this.jogadores, playerName);
+    //const player = Player.findPlayerByName(this.players, playerName);
+    const player = winnerDeskItem.player;
     if (player) {
       player.currentScore += 1;
     }
 
-    this.desk = new Desk();
+    this.clearDesk();
 
     return player;
   }
 
   removePlayerByPosition(playerPosition: number): Player | undefined {
-    if (playerPosition < this.jogadores.length) {
-      const removed = this.jogadores.splice(playerPosition, 1);
+    if (playerPosition < this.players.length) {
+      const removed = this.players.splice(playerPosition, 1);
       return removed[0];
     }
     return undefined;
@@ -71,44 +70,48 @@ export class Room {
   join(name: string, passwd: string): Player {
     const id = this.buildPlayerId(name, passwd);
     const newPlayer = new Player(id, name);
-    this.jogadores.push(newPlayer);
+    this.players.push(newPlayer);
     return newPlayer;
   }
 
   leave(player: Player) {
-    this.jogadores = this.jogadores.filter((j) => {
+    this.players = this.players.filter((j) => {
       return j != player;
     });
   }
 
   changeAdmin(jogador: Player, isAdmin: boolean) {
     // Setar jogador como admin
-    this.jogadores.forEach((j) => {
+    this.players.forEach((j) => {
       j.admin = false;
     });
     jogador.admin = isAdmin;
   }
 
-  playCard(jogador: Player, playerCardPosition: number): string[] {
-    const card = jogador.removeCardFromPosition(playerCardPosition);
-    this.desk.jogarCarta(card, jogador.name);
-    return jogador.cards;
+  playCard(player: Player, playerCardPosition: number): string[] {
+    const card = player.removeCardFromPosition(playerCardPosition);
+    this.desk.playCard(player, card);
+    return player.cards;
   }
 
   newRound() {
-    this.desk = new Desk();
+    this.clearDesk();
   }
 
   reboot() {
     this.closed = false;
-    this.desk = new Desk();
-    this.curinga = '';
-    this.jogadores = [];
+    this.wildcard = '';
+    this.players = [];
+    this.clearDesk();
   }
 
   findRoomPlayer(name: string, passwd: string): Player | undefined {
     const id = this.buildPlayerId(name, passwd);
-    return Player.findPlayerByNameAndId(this.jogadores, name, id);
+    return Player.findPlayerByNameAndId(this.players, name, id);
+  }
+
+  private clearDesk() {
+    this.desk = new Desk();
   }
 
   private buildPlayerId(name: string, passwd: string): string {

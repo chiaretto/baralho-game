@@ -11,13 +11,13 @@ export class RoomResponse {
 
   constructor(room: Room) {
     this.salaFechada = room.closed;
-    this.curingas = room.curinga ? [room.curinga] : [];
+    this.curingas = room.wildcard ? [room.wildcard] : [];
 
     this.mesa = room.desk
       .getCurrentCards()
-      .map((item) => new RoomDeskItemResponse(item.card, item.playerName));
+      .map((item) => new RoomDeskItemResponse(item.player, item.card));
     this.quantidadeMesa = room.desk.length();
 
-    this.jogadores = room.jogadores.map((p) => new RoomPlayerResponse(p));
+    this.jogadores = room.players.map((p) => new RoomPlayerResponse(p));
   }
 }

@@ -8,12 +8,12 @@ export class RoomPlayerResponse {
   dealer: boolean;
   admin: boolean;
 
-  constructor(jogador: Player) {
-    this.nome = jogador.name;
-    this.quantidadeCartas = jogador.cards.length;
-    this.pontosRodada = jogador.currentScore;
-    this.previsaoRodada = jogador.currentForecast;
-    this.dealer = jogador.dealer;
-    this.admin = jogador.admin;
+  constructor(player: Player) {
+    this.nome = player.name;
+    this.quantidadeCartas = player.cards.length;
+    this.pontosRodada = player.currentScore;
+    this.previsaoRodada = player.currentForecast;
+    this.dealer = player.dealer;
+    this.admin = player.admin;
   }
 }

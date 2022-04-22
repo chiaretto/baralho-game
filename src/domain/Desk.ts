@@ -1,3 +1,5 @@
+import { Player } from "./Player";
+
 export class Desk {
   private cards: DeskItem[];
 
@@ -9,25 +11,25 @@ export class Desk {
     return this.cards.length;
   }
 
-  getCardByPosition(position: number) {
-    return this.cards.slice(position, position + 1);
+  getDeskItemByPosition(position: number) : DeskItem {
+    return this.cards.slice(position, position + 1)[0];
   }
 
-  jogarCarta(card: string, playerName: string) {
-    this.cards.push(new DeskItem(card, playerName));
+  playCard(player: Player, card: string) {
+    this.cards.push(new DeskItem(card, player));
   }
 
-  getCurrentCards() {
+  getCurrentCards(): DeskItem[] {
     return this.cards;
   }
 }
 
 class DeskItem {
   card: string;
-  playerName: string;
+  player: Player;
 
-  constructor(card: string, playerName: string) {
+  constructor(card: string, player: Player) {
     this.card = card;
-    this.playerName = playerName;
+    this.player = player;
   }
 }

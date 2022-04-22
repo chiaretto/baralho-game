@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Deck } from '../domain/Deck';
-import { repository, Repository } from '../database/Repository';
+import { repository } from '../database/Repository';
 import { RoomResponse } from './response/RoomResponse';
 
 interface ScrambleRequest {
@@ -16,11 +16,6 @@ interface PlayRequest {
 }
 
 class RoomController {
-  private repository: Repository;
-
-  constructor(repository: Repository) {
-    this.repository = repository;
-  }
 
   public home(req: Request, res: Response) {
     return res.json(Deck.fullCards);
@@ -87,10 +82,10 @@ class RoomController {
   }
 
   public reboot(req: Request, res: Response) {
-    const room = this.repository.currentRoom;
+    const room = repository.currentRoom;
     room.reboot();
     res.json();
   }
 }
 
-export const roomController = new RoomController(repository);
+export const roomController = new RoomController();

@@ -7,6 +7,7 @@ export class MyRoomInfoResponse {
   dealer: boolean;
   admin: boolean;
   jogadorAtual: boolean;
+  perguntarPrevisao: boolean;
 
   constructor(player: Player, room: Room) {
     this.nome = player.name;
@@ -15,5 +16,7 @@ export class MyRoomInfoResponse {
 
     this.dealer = player === room.currentGame?.getDealer();
     this.cartas = room.currentGame?.findGamePlayer(player)?.cards ?? [];
+
+    this.perguntarPrevisao = this.jogadorAtual && !(room.currentGame?.isForecasted ?? false);
   }
 }

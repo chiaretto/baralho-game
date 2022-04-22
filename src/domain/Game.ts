@@ -4,21 +4,24 @@ import { Player } from './Player';
 import { GamePlayer } from './GamePlayer';
 
 export class Game {
+  id: number;
   private wildcard: string;
   private currentRound: Desk;
-  private rounds: Desk[];
   private dealer: Player;
   private players: GamePlayer[];
+  
+  isForecasted: boolean;
 
   constructor(dealer: Player, players: Player[], quantity: number) {
-    const scrambledDeck = Deck.getScrambled();        
+    const scrambledDeck = Deck.getScrambled();
+    this.id = quantity;
     this.dealer = dealer;
     this.wildcard = scrambledDeck.splice(0, 1)[0];
-    this.rounds = [];
     // Distribui as cartas
     this.players = players.map((p) => new GamePlayer(p, scrambledDeck.splice(0, quantity).sort()));
     this.currentRound = new Desk();
     this.newRound();
+    this.isForecasted = false;
   }
 
   getWildCard(): string {
@@ -33,9 +36,12 @@ export class Game {
     return this.currentRound;
   }
 
+  getPlayers() : GamePlayer[] {
+    return this.players;
+  }
+
   newRound() {
     this.currentRound = new Desk();
-    this.rounds.push(this.currentRound);
   }
 
   playCard(gamePlayer: GamePlayer, cardPosition: number) {
@@ -43,12 +49,18 @@ export class Game {
     this.currentRound.playCard(gamePlayer, card);
   }
 
+  setForecast(gamePlayer: GamePlayer, forecast: number) {
+    gamePlayer.forecast = forecast;
+    this.isForecasted = this.players.filter((p) => p.forecast === undefined).length == 0;
+  }
+
   leave(player: Player) {
     this.players = this.players.filter((p) => p.player !== player);
   }
 
   calculateScore(player: Player) : number {
-    return this.findGamePlayer(player)?.score ?? 0;
+    const gamePlayer = this.findGamePlayer(player);
+    return gamePlayer?.computedScore() ?? 0;
   }
 
   setCurrentWinner(deskPosition: number) {

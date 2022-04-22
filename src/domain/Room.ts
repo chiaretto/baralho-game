@@ -1,4 +1,5 @@
 import { Game } from './Game';
+import { GamePlayer } from './GamePlayer';
 import { Player } from './Player';
 
 export class Room {
@@ -18,8 +19,6 @@ export class Room {
   }
 
   scramble(dealer: Player, quantity: number) {
-    this.players.forEach((p) => p.fullScore += this.currentGame?.calculateScore(p) ?? 0);
-
     // Limpa Mesa
     this.newGame(dealer, quantity);
 
@@ -33,8 +32,10 @@ export class Room {
     const winner = this.getRequiredGame().setCurrentWinner(deskPosition);
     this.currentPlayer = winner?.player;
 
+    // finalizou game
     if (winner && winner.cards.length == 0) {
       this.closed = false;
+      this.players.forEach((p) => p.fullScore += this.currentGame?.calculateScore(p) ?? 0);
     }
     return this.currentPlayer;
   }
@@ -69,6 +70,10 @@ export class Room {
       return j != player;
     });
     this.currentGame?.leave(player);
+
+    if (this.players.length == 0) {
+      this.closed = false;
+    }
   }
 
   changeAdmin(jogador: Player, isAdmin: boolean) {
@@ -78,11 +83,20 @@ export class Room {
 
   playCard(player: Player, playerCardPosition: number): string[] {
     const gamePlayer = this.getRequiredGame().findGamePlayer(player);
-    if (gamePlayer && this.currentPlayer == player) {      
+    if (this.getRequiredGame().isForecasted && gamePlayer && this.currentPlayer == player) {      
       this.getRequiredGame().playCard(gamePlayer, playerCardPosition);
       this.rotatePlayer();
     }
     return gamePlayer?.cards ?? [];
+  }
+
+  setForecast(player: Player, forecast: number) : GamePlayer | undefined {
+    const gamePlayer = this.getRequiredGame().findGamePlayer(player);
+    if (gamePlayer && this.currentPlayer == player) {      
+      this.getRequiredGame().setForecast(gamePlayer, forecast);
+      this.rotatePlayer();
+    }
+    return gamePlayer;
   }
 
   reboot() {

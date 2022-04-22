@@ -11,6 +11,9 @@ roomRouter.get('/', roomController.showRoom);
 roomRouter.post('/embaralhar', roomController.scramble);
 roomRouter.post('/setarGanhador', roomController.setCurrentWinner);
 roomRouter.post('/jogar', roomController.play);
+roomRouter.post('/previsao', roomController.setForecast);
+
+roomRouter.get('/pontuacao', roomController.fullScore);
 roomRouter.post('/novaRodada', roomController.newRound);
 roomRouter.get('/reiniciar', roomController.reboot);
 

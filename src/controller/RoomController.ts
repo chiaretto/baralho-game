@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import { Deck } from '../domain/Deck';
 import { repository } from '../database/Repository';
 import { RoomResponse } from './response/RoomResponse';
+import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
+import { RoomScoreDetailedResponse } from './response/score/RoomScoreDetailedResponse';
 
-interface ScrambleRequest {
+interface RoundRequest {
   quantidade: number;
   nome: string;
   senha: string;
@@ -26,7 +28,7 @@ class RoomController {
   }
 
   public scramble(req: Request, res: Response) {
-    const body: ScrambleRequest = req.body;
+    const body: RoundRequest = req.body;
     const room = repository.currentRoom;
 
     const dealer = room.findRoomPlayer(body.nome, body.senha);
@@ -73,6 +75,24 @@ class RoomController {
     res.json({
       cartas: cards,
     });
+  }
+
+  public setForecast(req: Request, res: Response) {
+    const body: RoundRequest = req.body;
+    const room = repository.currentRoom;
+
+    const player = room.findRoomPlayer(body.nome, body.senha);
+
+    if (player) {
+      room.setForecast(player, body.quantidade);
+      res.json(new MyRoomInfoResponse(player, room));
+    } else {
+      res.json();
+    }
+  }
+
+  public fullScore(req: Request, res: Response) {
+    res.json(new RoomScoreDetailedResponse(repository.currentRoom));
   }
 
   public newRound(req: Request, res: Response) {

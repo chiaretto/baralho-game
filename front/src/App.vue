@@ -15,7 +15,9 @@
                     </span>
                     <span class="nome" :class="item.admin ? 'admin' : ''">{{ item.nome }}</span>
                     <span title="Quantidade cartas" class="qtdCartas badge" :class="'cor-'+item.quantidadeCartas">{{ item.quantidadeCartas }}</span>
-                    <span title="Vitorias" class="qtdPontos badge badge-dark">{{ item.pontosRodada }}pts</span>
+                    <span title="Vitorias" class="qtdPontos badge badge-dark">{{ item.pontosRodada }}</span>
+                    <span title="Previsao" class="previsao badge badge-light">{{ item.previsaoRodada }}</span>
+                    <span title="Total" class="totalPontos badge badge-dark">{{ item.pontosTotal }}</span>
                     <span class="removerJogador" @click="removerJogador(index)" v-if="isAdmin && !item.admin">Remover</span>
                 </div>
             </span>
@@ -348,8 +350,34 @@
                             this.dealer = response.data.dealer
                             this.admin = response.data.admin
                             this.jogadorAtual = response.data.jogadorAtual
+                            if (response.data.perguntarPrevisao && this.informandoPrevisao !== true) {
+                                setTimeout(() => this.informarPrevisao(), 200);
+                            }
                         })
                 }
+            },
+            informarPrevisao() {
+              if (this.informandoPrevisao !== true) {
+                this.informandoPrevisao = true;
+
+                let pmt = prompt("Informe sua previsão:");
+                const qtd = parseInt(pmt)
+                if (qtd != undefined) {
+                    axios.post(this.host + "/salas/previsao",
+                        {
+                            "nome": this.nome,
+                            "senha": this.senha,
+                            "quantidade": qtd
+                        })
+                        .then((response) => {
+                            this.cartas = response.data.cartas
+                            this.dealer = response.data.dealer
+                            this.admin = response.data.admin
+                            this.jogadorAtual = response.data.jogadorAtual
+                            this.informandoPrevisao = false;                       
+                        });
+                }
+              }
             }
         }
     }
@@ -446,7 +474,7 @@
         text-align: center;
         position: relative;
         float: left;
-        margin: 0 20px;
+        margin: 0 30px;
     }
     .jogador .admin {
         border: 1px solid #00a651;
@@ -477,6 +505,18 @@
     .jogador .qtdPontos{
         position: absolute;
         top: 0;
+        right: -30px;
+        font-size: 100%;
+    }
+    .jogador .previsao{
+        position: absolute;
+        top: 0;
+        left: -12px;
+        font-size: 100%;
+    }
+    .jogador .totalPontos{
+        position: absolute;
+        top: 30px;
         right: -30px;
         font-size: 100%;
     }

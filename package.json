@@ -7,7 +7,7 @@
     "build": "npx tsc",
     "start": "npm run build --prefix front && npx tsc && node dist/app.js",
     "startServer": "npx tsc && node dist/app.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/app.js\"",
+    "dev": "export RUN_LOCAL=true && concurrently \"npx tsc --watch\" \"nodemon -q dist/app.js\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint --ext .tsx,.ts ."
   },

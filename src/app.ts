@@ -1,7 +1,7 @@
 import express, { ErrorRequestHandler } from 'express';
 import logger from 'morgan';
 import path from 'path';
-//import cors from 'cors';
+import cors from 'cors';
 import createHttpError from 'http-errors';
 import { indexRouter } from './router/IndexRouter';
 import { roomRouter } from './router/RoomRouter';
@@ -15,7 +15,12 @@ app.use(logger('dev', {
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 
-//app.use(cors);
+if (process.env.RUN_LOCAL || false) {
+  console.log('Using local config');
+  app.use(cors({
+    origin: ['http://localhost:8080']
+  }));
+}
 
 // Use user-defined routes;
 app.use('/', indexRouter);

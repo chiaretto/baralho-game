@@ -71,8 +71,9 @@
         data: function () {
             return {
                 // host: 'https://baralho-game.herokuapp.com',
-                // host: 'http://localhost:3000', // Para executar local use essa porta
-                host: '',
+                //host: 'http://localhost:3000', // Para executar local use essa porta
+                //host: '',
+                host: process.env.VUE_APP_ROOT_API || '',
                 nome: null,
                 senha: null,
                 admin: false,
@@ -347,12 +348,16 @@
                             "senha": this.senha
                         })
                         .then((response) => {
-                            this.cartas = response.data.cartas
-                            this.dealer = response.data.dealer
-                            this.admin = response.data.admin
-                            this.jogadorAtual = response.data.jogadorAtual
-                            if (response.data.perguntarPrevisao && this.informandoPrevisao !== true) {
-                                setTimeout(() => this.informarPrevisao(parseInt(response.data.restricaoPrevisao)), 200);
+                            if (response.data) {
+                                this.cartas = response.data.cartas
+                                this.dealer = response.data.dealer
+                                this.admin = response.data.admin
+                                this.jogadorAtual = response.data.jogadorAtual
+                                if (response.data.perguntarPrevisao && this.informandoPrevisao !== true) {
+                                    setTimeout(() => this.informarPrevisao(parseInt(response.data.restricaoPrevisao)), 200);
+                                }
+                            } else {
+                                this.sair();
                             }
                         })
                 }

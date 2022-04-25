@@ -1,30 +1,36 @@
 # Baralho-Game
 
+* Require NodeJS 14+
+
 ## How to run the Game?
-npm start
+`npm start`
+
+This will start the server within the front embedded at http://localhost:3000/
 
 # Setup development environment
 Clone the repo : 
 https://github.com/chiaretto/baralho-game.git
 
+## Backend
 
-## install dependencies
-npm install
+Project root directory
 
-## serve with hot reload at localhost:8080
-npm run dev
+### Install dependencies
+`npm install`
 
-## build frontend for production with minification
-cd front/ && npm run build
+### Run with hot reload at http://localhost:3000
+`npm run dev`
 
-## build for production with minification
-npm run build
+## Frontend
 
-## build for production and view the bundle analyzer report
-npm run build --report
+Go to the front directory
+`cd front`
 
-## run unit tests
-npm run unit
+### Install dependencies
+`npm install`
 
-## run all tests
-npm test
+### Build for production with minification (optional)
+`npm run build`
+
+### Run with hot reload at localhost:8080
+`npm run dev`

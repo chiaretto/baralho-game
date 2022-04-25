@@ -29,13 +29,14 @@ export class Room {
   }
 
   setCurrentWinnerByDeskPosition(deskPosition: number): Player | undefined {
-    const winner = this.getRequiredGame().setCurrentWinner(deskPosition);
-    this.currentPlayer = winner?.player;
+    const requiredGame = this.getRequiredGame();
+    const winner = requiredGame.setCurrentWinner(deskPosition);
 
     // finalizou game
     if (winner && winner.cards.length == 0) {
+      this.currentPlayer = winner.player;
       this.closed = false;
-      this.players.forEach((p) => p.fullScore += this.currentGame?.calculateScore(p) ?? 0);
+      this.players.forEach((p) => p.fullScore += requiredGame.calculateScore(p) ?? 0);
     }
     return this.currentPlayer;
   }
@@ -82,24 +83,24 @@ export class Room {
   }
 
   playCard(player: Player, playerCardPosition: number): string[] {
-    const gamePlayer = this.getRequiredGame().findGamePlayer(player);
-    if (this.getRequiredGame().isForecasted && gamePlayer && this.currentPlayer == player) {      
-      this.getRequiredGame().playCard(gamePlayer, playerCardPosition);
+    const requiredGame = this.getRequiredGame();
+    const gamePlayer = requiredGame.findGamePlayer(player);
+    if (requiredGame.isForecasted && gamePlayer && this.currentPlayer == player) {      
+      requiredGame.playCard(gamePlayer, playerCardPosition);
       this.rotatePlayer();
     }
     return gamePlayer?.cards ?? [];
   }
 
   setForecast(player: Player, forecast: number) : GamePlayer | undefined {
-    const gamePlayer = this.getRequiredGame().findGamePlayer(player);
-    if (gamePlayer && this.currentPlayer == player) {
-      const restriction = this.getRequiredGame().getForecastRestriction(player);
-      if (restriction !== undefined && restriction === forecast) {
+    const requiredGame = this.getRequiredGame();
+    const gamePlayer = requiredGame.findGamePlayer(player);
+    if (gamePlayer && this.currentPlayer == player && forecast >= 0) {
+      if (requiredGame.setForecast(gamePlayer, forecast)) {
+        this.rotatePlayer();
+      } else {
         console.log('Forecast not allowed for player ' + player.name + ' - ' + forecast);
-        return gamePlayer;
       }
-      this.getRequiredGame().setForecast(gamePlayer, forecast);
-      this.rotatePlayer();
     }
     return gamePlayer;
   }

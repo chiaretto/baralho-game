@@ -49,9 +49,15 @@ export class Game {
     this.currentRound.playCard(gamePlayer, card);
   }
 
-  setForecast(gamePlayer: GamePlayer, forecast: number) {
-    gamePlayer.forecast = forecast;
-    this.isForecasted = this.players.filter((p) => p.forecast === undefined).length == 0;
+  setForecast(gamePlayer: GamePlayer, forecast: number) : boolean {
+    const restriction = this.getForecastRestriction(gamePlayer.player);
+    const isInvalidForecast = forecast < 0 || (restriction !== undefined && restriction === forecast);
+
+    if (!isInvalidForecast) {
+      gamePlayer.forecast = forecast;
+      this.isForecasted = this.players.filter((p) => p.forecast === undefined).length == 0;
+    }
+    return !isInvalidForecast;
   }
 
   leave(player: Player) {

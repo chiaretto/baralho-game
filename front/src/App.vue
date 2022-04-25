@@ -185,8 +185,9 @@
                 });
             },
             embaralhar() {
-                let qtd = prompt('Quantas cartas ?')
-                if (qtd != undefined && qtd != '') {
+                let pmt = prompt('Quantas cartas ?')
+                const qtd = parseInt(pmt)
+                if (pmt != undefined && !isNaN(qtd) && qtd > 0) {
                     axios.post(this.host + "/salas/embaralhar",
                         {
                             "quantidade": qtd,
@@ -351,31 +352,38 @@
                             this.admin = response.data.admin
                             this.jogadorAtual = response.data.jogadorAtual
                             if (response.data.perguntarPrevisao && this.informandoPrevisao !== true) {
-                                setTimeout(() => this.informarPrevisao(), 200);
+                                setTimeout(() => this.informarPrevisao(parseInt(response.data.restricaoPrevisao)), 200);
                             }
                         })
                 }
             },
-            informarPrevisao() {
+            informarPrevisao(restricaoPrevisao) {
               if (this.informandoPrevisao !== true) {
                 this.informandoPrevisao = true;
-
-                let pmt = prompt("Informe sua previsão:");
-                const qtd = parseInt(pmt)
-                if (qtd != undefined) {
-                    axios.post(this.host + "/salas/previsao",
-                        {
-                            "nome": this.nome,
-                            "senha": this.senha,
-                            "quantidade": qtd
-                        })
-                        .then((response) => {
-                            this.cartas = response.data.cartas
-                            this.dealer = response.data.dealer
-                            this.admin = response.data.admin
-                            this.jogadorAtual = response.data.jogadorAtual
-                            this.informandoPrevisao = false;                       
-                        });
+                const possuiRestricao = !isNaN(restricaoPrevisao);
+                const strRestricao = possuiRestricao ? "(não pode ser " + restricaoPrevisao + ") " : "";
+                let precisaPrevisao = true;
+                while(precisaPrevisao) {
+                    let pmt = prompt("Informe sua previsão: " + strRestricao);
+                    const qtd = parseInt(pmt)
+                    if (pmt != undefined && !isNaN(qtd) && qtd >= 0) {
+                        if (qtd !== restricaoPrevisao) {
+                            precisaPrevisao = false;
+                            axios.post(this.host + "/salas/previsao",
+                                {
+                                    "nome": this.nome,
+                                    "senha": this.senha,
+                                    "quantidade": qtd
+                                })
+                                .then((response) => {
+                                    this.cartas = response.data.cartas
+                                    this.dealer = response.data.dealer
+                                    this.admin = response.data.admin
+                                    this.jogadorAtual = response.data.jogadorAtual
+                                    this.informandoPrevisao = false;                       
+                                });
+                        }
+                    }
                 }
               }
             }

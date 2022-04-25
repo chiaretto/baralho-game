@@ -92,7 +92,12 @@ export class Room {
 
   setForecast(player: Player, forecast: number) : GamePlayer | undefined {
     const gamePlayer = this.getRequiredGame().findGamePlayer(player);
-    if (gamePlayer && this.currentPlayer == player) {      
+    if (gamePlayer && this.currentPlayer == player) {
+      const restriction = this.getRequiredGame().getForecastRestriction(player);
+      if (restriction !== undefined && restriction === forecast) {
+        console.log('Forecast not allowed for player ' + player.name + ' - ' + forecast);
+        return gamePlayer;
+      }
       this.getRequiredGame().setForecast(gamePlayer, forecast);
       this.rotatePlayer();
     }

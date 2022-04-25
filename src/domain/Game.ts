@@ -63,6 +63,14 @@ export class Game {
     return gamePlayer?.computedScore() ?? 0;
   }
 
+  getForecastRestriction(player: Player) : number | undefined {
+    if (player === this.dealer) {
+      const limitSum = this.id;
+      const forecastSum = this.players.map((p) => p.forecast ?? 0).reduce((a,b) => a + b, 0 );
+      return limitSum - forecastSum;
+    }
+  }
+
   setCurrentWinner(deskPosition: number) {
     // só permite setar ganhador quanto todos tiverem jogado na mesa
     if (!(this.currentRound.length() === this.players.length)) {

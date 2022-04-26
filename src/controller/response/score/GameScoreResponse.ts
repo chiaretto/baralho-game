@@ -7,6 +7,6 @@ export class GameScoreResponse {
 
   constructor(game: Game) {
     this.id = game.id;
-    this.playerScores = game.getPlayers().map((p) => new PlayerScoreResponse(p));
+    this.playerScores = game.players.map((p) => new PlayerScoreResponse(p));
   }
 }

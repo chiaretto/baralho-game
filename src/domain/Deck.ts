@@ -1,9 +1,9 @@
 export class Deck {
-  static readonly colours: string[] = ['r', 'b'];
+  private static readonly colours: string[] = ['r', 'b'];
 
-  static readonly nypes = ['♥', '♦', '♣', '♠'];
+  private static readonly nypes = ['♥', '♦', '♣', '♠'];
 
-  static readonly cards = [
+  private static readonly cards = [
     '2',
     '3',
     '4',
@@ -19,13 +19,13 @@ export class Deck {
     'A',
   ];
 
-  static readonly fullCardsColours = Deck.nypes
+  private static readonly fullCardsColours = Deck.nypes
     .map((nype) => {
       return Deck.cards.map((card) => card + nype);
     })
     .reduce((a, b) => a.concat(b), []);
 
-  static readonly fullCards = Deck.colours
+  private static readonly fullCards = Deck.colours
     .map((colour) => {
       return Deck.fullCardsColours.map((card) => card + colour);
     })
@@ -34,5 +34,9 @@ export class Deck {
   public static getScrambled(): string[] {
     const newDeck = [...Deck.fullCards];
     return newDeck.sort(() => 0.5 - Math.random());
+  }
+
+  public static get allCards(): string[] {
+    return [...Deck.fullCards];
   }
 }

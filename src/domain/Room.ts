@@ -29,7 +29,7 @@ export class Room {
   }
 
   setCurrentWinnerByDeskPosition(deskPosition: number): Player | undefined {
-    const requiredGame = this.getRequiredGame();
+    const requiredGame = this.requiredGame;
     const winner = requiredGame.setCurrentWinner(deskPosition);
 
     // finalizou game
@@ -83,7 +83,7 @@ export class Room {
   }
 
   playCard(player: Player, playerCardPosition: number): string[] {
-    const requiredGame = this.getRequiredGame();
+    const requiredGame = this.requiredGame;
     const gamePlayer = requiredGame.findGamePlayer(player);
     if (requiredGame.isForecasted && gamePlayer && this.currentPlayer == player) {      
       requiredGame.playCard(gamePlayer, playerCardPosition);
@@ -93,7 +93,7 @@ export class Room {
   }
 
   setForecast(player: Player, forecast: number) : GamePlayer | undefined {
-    const requiredGame = this.getRequiredGame();
+    const requiredGame = this.requiredGame;
     const gamePlayer = requiredGame.findGamePlayer(player);
     if (gamePlayer && this.currentPlayer == player && forecast >= 0) {
       if (requiredGame.setForecast(gamePlayer, forecast)) {
@@ -118,11 +118,7 @@ export class Room {
     return Player.findPlayerByNameAndId(this.players, name, id);
   }
 
-  getWildCard() : string | undefined {
-    return this.currentGame?.getWildCard();
-  }
-
-  private getRequiredGame() : Game {
+  private get requiredGame() : Game {
     if (this.currentGame) return this.currentGame;
     throw Error('Game has not been started');
   }

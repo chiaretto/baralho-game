@@ -15,7 +15,7 @@ export class MyRoomInfoResponse {
     this.admin = player === room.currentAdmin;
     this.jogadorAtual = player === room.currentPlayer;
 
-    this.dealer = player === room.currentGame?.getDealer();
+    this.dealer = player === room.currentGame?.dealer;
     this.cartas = room.currentGame?.findGamePlayer(player)?.cards ?? [];
 
     this.perguntarPrevisao = this.jogadorAtual && !(room.currentGame?.isForecasted ?? false);

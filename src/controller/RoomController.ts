@@ -20,7 +20,7 @@ interface PlayRequest {
 class RoomController {
 
   public home(req: Request, res: Response) {
-    return res.json(Deck.fullCards);
+    return res.json(Deck.allCards);
   }
 
   public showRoom(req: Request, res: Response) {

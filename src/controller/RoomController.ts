@@ -5,13 +5,13 @@ import { RoomResponse } from './response/RoomResponse';
 import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
 import { RoomScoreDetailedResponse } from './response/score/RoomScoreDetailedResponse';
 
-interface RoundRequest {
+export interface RoundRequest {
   quantidade: number;
   nome: string;
   senha: string;
 }
 
-interface PlayRequest {
+export interface PlayRequest {
   nome: string;
   senha: string;
   posicaoCarta: number;
@@ -34,7 +34,7 @@ class RoomController {
     const dealer = room.findRoomPlayer(body.nome, body.senha);
 
     let scrambled = false;
-    if (dealer && body.quantidade > 0) {
+    if (dealer && !room.closed && body.quantidade > 0) {
       room.scramble(dealer, body.quantidade);
 
       scrambled = true;

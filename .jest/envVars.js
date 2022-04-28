@@ -1,0 +1,1 @@
+process.env.JOIN_PUBLIC_FOLDER='false'

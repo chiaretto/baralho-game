@@ -7,5 +7,6 @@ export default {
   clearMocks: true,
   preset: 'ts-jest',
   testEnvironment: 'node',
-  rootDir: './src'
+  rootDir: './src',
+  setupFiles: ['<rootDir>/../.jest/envVars.js']
 };

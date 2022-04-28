@@ -1,18 +1,19 @@
-import express, { ErrorRequestHandler } from 'express';
+import express from 'express';
 import logger from 'morgan';
 import path from 'path';
 import cors from 'cors';
-import createHttpError from 'http-errors';
-import { indexRouter } from './router/IndexRouter';
-import { roomRouter } from './router/RoomRouter';
+import { routes } from './router/routes';
+import { setupErrorHandler } from './router/serverErrorHandler';
 
-const app = express();
-const port = process.env.PORT || 3000;
+export const app = express();
+const JOIN_PUBLIC_FOLDER = process.env.JOIN_PUBLIC_FOLDER ?? 'true';
 
 app.use(logger('dev', {
   skip: function(req, res) { return res.statusCode < 400; }
 }));
-app.use(express.static(path.join(__dirname, '../public')));
+if (JOIN_PUBLIC_FOLDER == 'true') {
+  app.use(express.static(path.join(__dirname, '../public')));
+}
 app.use(express.json());
 
 if (process.env.RUN_LOCAL || false) {
@@ -23,24 +24,6 @@ if (process.env.RUN_LOCAL || false) {
 }
 
 // Use user-defined routes;
-app.use('/', indexRouter);
-app.use('/salas', roomRouter);
+routes(app);
 
-app.use(function (req, res, next) {
-  next(createHttpError(404));
-});
-
-const errorHandler: ErrorRequestHandler = (err, req, res) => {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-};
-
-app.use(errorHandler);
-
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-});
+setupErrorHandler(app);

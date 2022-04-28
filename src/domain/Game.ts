@@ -46,8 +46,12 @@ export class Game {
   }
 
   playCard(gamePlayer: GamePlayer, cardPosition: number) {
-    const card = gamePlayer.removeCardFromPosition(cardPosition);
-    this._currentRound.playCard(gamePlayer, card);
+    if (this._currentRound.getPlayedCard(gamePlayer) == undefined) {
+      const card = gamePlayer.removeCardFromPosition(cardPosition);
+      this._currentRound.playCard(gamePlayer, card);
+    } else {
+      console.debug('Player ' + gamePlayer.player.name + ' has already played a card');
+    }
   }
 
   setForecast(gamePlayer: GamePlayer, forecast: number) : boolean {
@@ -95,7 +99,11 @@ export class Game {
     }
   }
 
-  setCurrentWinner(deskPosition: number) {
+  setCurrentWinner(deskPosition: number) : GamePlayer | undefined {
+    if (deskPosition < 0 || deskPosition >= this._currentRound.length()) {
+      console.log('Invalid deskPosition ' + deskPosition + ' from desk size ' + this._currentRound.length());
+      return undefined;
+    }
     // só permite setar ganhador quanto todos tiverem jogado na mesa
     if (!(this._currentRound.length() === this._players.length)) {
       console.log('Desk length != players.length');
@@ -108,7 +116,7 @@ export class Game {
       console.log('Players not played: ' + playersNotPlayed.length);
       return undefined;
     }
-  
+
     const winnerDeskItem = this._currentRound.getDeskItemByPosition(deskPosition);
   
     // identifica jogador da carta vencedora e soma ponto

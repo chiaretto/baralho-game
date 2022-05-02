@@ -46,7 +46,14 @@ class RoomController {
   }
 
   public setCurrentWinner(req: Request, res: Response) {
-    const winnerPosition = req.body.posicaoCartaVencedora;
+    const winnerPosition = parseInt(req.body.posicaoCartaVencedora);
+    if (isNaN(winnerPosition) || winnerPosition < 0) {
+      res.status(400);
+      res.json({
+        error: 'InvalidPayload',
+        message: 'Invalid card position',
+      });
+    }
 
     const room = repository.currentRoom;
     const winner = room.setCurrentWinnerByDeskPosition(winnerPosition);
@@ -56,7 +63,7 @@ class RoomController {
       });
     } else {
       res.json({
-        error: 'Winner not found',
+        message: 'Winner not found',
       });
     }
   }

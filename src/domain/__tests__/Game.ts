@@ -554,6 +554,17 @@ describe('gameScoreCalculate', () => {
     expect(score2).toEqual(0);
     expect(score3).toEqual(0);
   });
+
+  it('should not calculate score player not found',async () => {
+    //given
+    const game = new Game(players[2], players, 3);
+
+    //when
+    const score1 = game.calculateScore(new Player('novo', 'NovoPlayer'));
+  
+    //then
+    expect(score1).toEqual(0);
+  });
 });
 
 describe('getForecastRestriction', () => {

@@ -506,3 +506,164 @@ describe('scramble', () => {
     }
   }
 });
+
+describe('setCurrentWinner', () => {
+
+  it('should not set winner invalid payload (negative)',async () => {
+    const room = new Room();
+  
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send({
+      posicaoCartaVencedora: -1
+    });
+        
+    expect(result.status).toBe(400);
+    expect(result.body.error).not.toBeUndefined();
+    expect(result.body.error).toEqual('InvalidPayload');
+    expect(result.body.message).toEqual('Invalid card position');
+  });
+
+  it('should not set winner invalid payload empty',async () => {
+    const room = new Room();
+  
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send();
+        
+    expect(result.status).toBe(400);
+    expect(result.body.error).not.toBeUndefined();
+    expect(result.body.error).toEqual('InvalidPayload');
+    expect(result.body.message).toEqual('Invalid card position');
+  });
+
+  it('should not set winner for empty room',async () => {
+    const room = new Room();
+  
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send({
+      posicaoCartaVencedora: 0
+    });
+        
+    expect(result.status).toBe(500);
+    expect(result.body.error).not.toBeUndefined();
+    expect(result.body.message).toEqual('Game has not been started');
+  });
+
+  it('should not set winner game not started',async () => {
+    const room = new Room();
+  
+    room.join('PlayerOne', '123');
+    room.join('PlayerTwo', '123');
+
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send({
+      posicaoCartaVencedora: 0
+    });
+        
+    expect(result.status).toBe(500);
+    expect(result.body.error).not.toBeUndefined();
+    expect(result.body.message).toEqual('Game has not been started');
+  });
+
+  it('should not set winner game not forecasted',async () => {
+    const room = new Room();
+  
+    room.join('PlayerOne', '123');
+    room.join('PlayerTwo', '123');
+
+    room.scramble(room.players[0], 3);
+
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send({
+      posicaoCartaVencedora: 0
+    });
+        
+    expect(result.status).toBe(200);
+    expect(result.body.message).toEqual('Winner not found');
+  });
+
+  it('should not set winner empty desk',async () => {
+    const room = new Room();
+  
+    room.join('PlayerOne', '123');
+    room.join('PlayerTwo', '123');
+
+    room.scramble(room.players[0], 3);
+
+    room.setForecast(room.players[1], 2);
+    room.setForecast(room.players[0], 2);
+
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send({
+      posicaoCartaVencedora: 0
+    });
+    
+    expect(room.currentGame?.isForecasted).toBeTruthy();
+    expect(result.status).toBe(200);
+    expect(result.body.message).toEqual('Winner not found');
+  });
+
+  it('should not set winner if any player has not played',async () => {
+    const room = new Room();
+  
+    room.join('PlayerOne', '123');
+    room.join('PlayerTwo', '123');
+
+    room.scramble(room.players[0], 3);
+
+    room.setForecast(room.players[1], 2);
+    room.setForecast(room.players[0], 2);
+
+    if (room.currentPlayer) {
+      room.playCard(room.currentPlayer, 0);
+    } else {
+      throw Error('should have currentPlayer');
+    }
+
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send({
+      posicaoCartaVencedora: 0
+    });
+    
+    expect(room.currentGame?.isForecasted).toBeTruthy();
+    expect(room.currentPlayer).toBe(room.players[0]);
+    expect(result.status).toBe(200);
+    expect(result.body.message).toEqual('Winner not found');
+  });
+
+  it('should have a winner',async () => {
+    const room = new Room();
+  
+    room.join('PlayerOne', '123');
+    room.join('PlayerTwo', '123');
+
+    room.scramble(room.players[0], 3);
+
+    room.setForecast(room.players[1], 2);
+    room.setForecast(room.players[0], 2);
+
+    if (room.currentPlayer) {
+      room.playCard(room.currentPlayer, 0);
+      room.playCard(room.currentPlayer, 0);
+    } else {
+      throw Error('should have currentPlayer');
+    }
+
+    repository.currentRoom = room;
+    
+    const result = await request(app).post('/salas/setarGanhador').send({
+      posicaoCartaVencedora: 1
+    });
+    
+    expect(room.currentGame?.isForecasted).toBeTruthy();
+    expect(room.currentPlayer).toBe(room.players[0]);
+    expect(result.status).toBe(200);
+    expect(result.body.nome).toEqual(room.players[0].name);
+  });
+});  

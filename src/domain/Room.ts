@@ -30,15 +30,21 @@ export class Room {
 
   setCurrentWinnerByDeskPosition(deskPosition: number): Player | undefined {
     const requiredGame = this.requiredGame;
+    if (!requiredGame.isForecasted) {
+      console.info('Game has not been forecasted');
+      return undefined;
+    }
     const winner = requiredGame.setCurrentWinner(deskPosition);
 
-    // finalizou game
-    if (winner && winner.cards.length == 0) {
+    if (winner) {
       this.currentPlayer = winner.player;
-      this.closed = false;
-      this.players.forEach((p) => p.fullScore += requiredGame.calculateScore(p) ?? 0);
+      // finalizou game
+      if (winner.cards.length == 0) {
+        this.closed = false;
+        this.players.forEach((p) => p.fullScore += requiredGame.calculateScore(p) ?? 0);
+      }
     }
-    return this.currentPlayer;
+    return winner?.player;
   }
 
   removePlayerByPosition(playerPosition: number): Player | undefined {

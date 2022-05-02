@@ -20,7 +20,7 @@ export class Desk {
   }
 
   getCurrentCards(): DeskItem[] {
-    return this.cards;
+    return [...this.cards];
   }
 
   getPlayedCard(player: GamePlayer) : DeskItem | undefined {

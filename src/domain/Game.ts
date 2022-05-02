@@ -5,63 +5,85 @@ import { GamePlayer } from './GamePlayer';
 
 export class Game {
   id: number;
-  private wildcard: string;
-  private currentRound: Desk;
-  private dealer: Player;
-  private players: GamePlayer[];
-  
-  isForecasted: boolean;
+  private _wildcard: string;
+  private _currentRound: Desk;
+  private _dealer: Player;
+  private _players: GamePlayer[];
+  private _isForecasted: boolean;
 
   constructor(dealer: Player, players: Player[], quantity: number) {
     const scrambledDeck = Deck.getScrambled();
     this.id = quantity;
-    this.dealer = dealer;
-    this.wildcard = scrambledDeck.splice(0, 1)[0];
+    this._dealer = dealer;
+    this._wildcard = scrambledDeck.splice(0, 1)[0];
     // Distribui as cartas
-    this.players = players.map((p) => new GamePlayer(p, scrambledDeck.splice(0, quantity).sort()));
-    this.currentRound = new Desk();
+    this._players = players.map((p) => new GamePlayer(p, scrambledDeck.splice(0, quantity).sort()));
+    this._currentRound = new Desk();
     this.newRound();
-    this.isForecasted = false;
+    this._isForecasted = false;
   }
 
-  getWildCard(): string {
-    return this.wildcard;
+  get wildCard(): string {
+    return this._wildcard;
   }
 
-  getDealer() : Player {
-    return this.dealer;
+  get dealer() : Player {
+    return this._dealer;
   }
 
-  getCurrentRound() {
-    return this.currentRound;
+  get currentRound() {
+    return this._currentRound;
   }
 
-  getPlayers() : GamePlayer[] {
-    return this.players;
+  get players() : GamePlayer[] {
+    return this._players;
   }
+
+  get isForecasted() : boolean {return this._isForecasted; }
 
   newRound() {
-    this.currentRound = new Desk();
+    this._currentRound = new Desk();
   }
 
   playCard(gamePlayer: GamePlayer, cardPosition: number) {
-    const card = gamePlayer.removeCardFromPosition(cardPosition);
-    this.currentRound.playCard(gamePlayer, card);
+    if (this._currentRound.getPlayedCard(gamePlayer) == undefined) {
+      const card = gamePlayer.removeCardFromPosition(cardPosition);
+      this._currentRound.playCard(gamePlayer, card);
+    } else {
+      console.debug('Player ' + gamePlayer.player.name + ' has already played a card');
+    }
   }
 
   setForecast(gamePlayer: GamePlayer, forecast: number) : boolean {
-    const restriction = this.getForecastRestriction(gamePlayer.player);
-    const isInvalidForecast = forecast < 0 || (restriction !== undefined && restriction === forecast);
+    if (forecast < 0) return false;
 
-    if (!isInvalidForecast) {
-      gamePlayer.forecast = forecast;
-      this.isForecasted = this.players.filter((p) => p.forecast === undefined).length == 0;
+    const isLastForecaster = this._players.filter((p) => p.forecast === undefined).length == 1;
+
+    if (gamePlayer.player == this.dealer) {
+      const restriction = this.getForecastRestriction(gamePlayer.player);
+      // Se a previsão é igual a restrição, ou ainda faltam outros jogadores para prever, 
+      // não é valida a previsão
+      if (restriction === forecast || !isLastForecaster) {
+        //console.log('Dealer must be the last one to forecast and cannot be ' + restriction);
+        return false;
+      }
     }
-    return !isInvalidForecast;
+
+    gamePlayer.forecast = forecast;
+    this._isForecasted = isLastForecaster;
+
+    return true;
   }
 
   leave(player: Player) {
-    this.players = this.players.filter((p) => p.player !== player);
+    const idx = this._players.findIndex((p) => p.player === player);
+    if (idx < 0) return;
+    
+    this._players.splice(idx, 1);
+
+    if (player == this._dealer) {
+      this._dealer = this._players[idx % this._players.length].player;
+    }    
   }
 
   calculateScore(player: Player) : number {
@@ -72,26 +94,30 @@ export class Game {
   getForecastRestriction(player: Player) : number | undefined {
     if (player === this.dealer) {
       const limitSum = this.id;
-      const forecastSum = this.players.map((p) => p.forecast ?? 0).reduce((a,b) => a + b, 0 );
+      const forecastSum = this._players.map((p) => p.forecast ?? 0).reduce((a,b) => a + b, 0 );
       return limitSum - forecastSum;
     }
   }
 
-  setCurrentWinner(deskPosition: number) {
+  setCurrentWinner(deskPosition: number) : GamePlayer | undefined {
+    if (deskPosition < 0 || deskPosition >= this._currentRound.length()) {
+      console.log('Invalid deskPosition ' + deskPosition + ' from desk size ' + this._currentRound.length());
+      return undefined;
+    }
     // só permite setar ganhador quanto todos tiverem jogado na mesa
-    if (!(this.currentRound.length() === this.players.length)) {
+    if (!(this._currentRound.length() === this._players.length)) {
       console.log('Desk length != players.length');
       return undefined;
     }
       
     // verifica se todos os jogadores da mesa jogaram    
-    const playersNotPlayed = this.players.filter((p) => this.currentRound.getPlayedCard(p) === undefined);
+    const playersNotPlayed = this._players.filter((p) => this._currentRound.getPlayedCard(p) === undefined);
     if (playersNotPlayed.length > 0) {
       console.log('Players not played: ' + playersNotPlayed.length);
       return undefined;
     }
-  
-    const winnerDeskItem = this.currentRound.getDeskItemByPosition(deskPosition);
+
+    const winnerDeskItem = this._currentRound.getDeskItemByPosition(deskPosition);
   
     // identifica jogador da carta vencedora e soma ponto
     //const player = Player.findPlayerByName(this.players, playerName);
@@ -107,6 +133,7 @@ export class Game {
   }
 
   findGamePlayer(player: Player) : GamePlayer | undefined {
-    return this.players.find((gp) => gp.player === player);
+    return this._players.find((gp) => gp.player === player);
   }
+
 }

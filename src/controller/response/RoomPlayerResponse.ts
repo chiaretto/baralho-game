@@ -23,6 +23,6 @@ export class RoomPlayerResponse {
     this.quantidadeCartas = cards.length;
     this.pontosRodada = gamePlayer?.score ?? 0;
     this.previsaoRodada = gamePlayer?.forecast ?? 0;
-    this.dealer = player === room.currentGame?.getDealer();
+    this.dealer = player === room.currentGame?.dealer;
   }
 }

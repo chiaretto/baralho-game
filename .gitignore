@@ -121,3 +121,4 @@ dist
 
 .DS_Store
 public/
+src/coverage

@@ -25,6 +25,6 @@ roomRouter.post('/virarAdmin', roomPlayerController.turnOnAdmin);
 roomRouter.post('/largarAdmin', roomPlayerController.turnOffAdmin);
 roomRouter.post('/removerJogador', roomPlayerController.removePlayerByPosition);
 
-console.log('Baralho iniciado: ' + Deck.nypes + ' - ' + Deck.fullCards.length);
+console.log('Baralho iniciado: ' + Deck.allCards.length);
 
 export { roomRouter };

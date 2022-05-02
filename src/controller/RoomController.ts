@@ -5,13 +5,13 @@ import { RoomResponse } from './response/RoomResponse';
 import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
 import { RoomScoreDetailedResponse } from './response/score/RoomScoreDetailedResponse';
 
-interface RoundRequest {
+export interface RoundRequest {
   quantidade: number;
   nome: string;
   senha: string;
 }
 
-interface PlayRequest {
+export interface PlayRequest {
   nome: string;
   senha: string;
   posicaoCarta: number;
@@ -20,7 +20,7 @@ interface PlayRequest {
 class RoomController {
 
   public home(req: Request, res: Response) {
-    return res.json(Deck.fullCards);
+    return res.json(Deck.allCards);
   }
 
   public showRoom(req: Request, res: Response) {
@@ -34,7 +34,7 @@ class RoomController {
     const dealer = room.findRoomPlayer(body.nome, body.senha);
 
     let scrambled = false;
-    if (dealer && body.quantidade > 0) {
+    if (dealer && !room.closed && body.quantidade > 0) {
       room.scramble(dealer, body.quantidade);
 
       scrambled = true;
@@ -46,7 +46,14 @@ class RoomController {
   }
 
   public setCurrentWinner(req: Request, res: Response) {
-    const winnerPosition = req.body.posicaoCartaVencedora;
+    const winnerPosition = parseInt(req.body.posicaoCartaVencedora);
+    if (isNaN(winnerPosition) || winnerPosition < 0) {
+      res.status(400);
+      res.json({
+        error: 'InvalidPayload',
+        message: 'Invalid card position',
+      });
+    }
 
     const room = repository.currentRoom;
     const winner = room.setCurrentWinnerByDeskPosition(winnerPosition);
@@ -56,7 +63,7 @@ class RoomController {
       });
     } else {
       res.json({
-        error: 'Winner not found',
+        message: 'Winner not found',
       });
     }
   }

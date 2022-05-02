@@ -18,7 +18,7 @@ export class GamePlayer {
   }
 
   computedScore() : number {
-    if (this.forecast && this.forecast == this.score) {
+    if (this.forecast === this.score) {
       return 3 + this.score;
     }
     return 0;

@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "export VUE_APP_ROOT_API=http://localhost:3000 && export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build --dest ../public",
+    "dev": "export VUE_APP_ROOT_API=http://localhost:3000 && vue-cli-service serve",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --dest ../public",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

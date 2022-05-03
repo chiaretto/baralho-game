@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "build": "npx tsc",
+    "build": "npm install --prefix front && npm run build --prefix front && npx tsc",
     "start": "npm run build --prefix front && npx tsc && node dist/index.js",
     "startServer": "npx tsc && node dist/index.js",
     "dev": "export RUN_LOCAL=true && concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",

@@ -120,5 +120,4 @@ dist
 .pnp.*
 
 .DS_Store
-public/
 src/coverage

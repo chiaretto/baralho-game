@@ -2,6 +2,8 @@ import { Deck } from './Deck';
 import { Desk } from './Desk';
 import { Player } from './Player';
 import { GamePlayer } from './GamePlayer';
+import { InvalidDeskPositionError } from '../errors/InvalidDeskPositionError';
+import { DeskNotCompletedError } from '../errors/DeskNotCompletedError';
 
 export class Game {
   id: number;
@@ -99,22 +101,16 @@ export class Game {
     }
   }
 
-  setCurrentWinner(deskPosition: number) : GamePlayer | undefined {
+  setCurrentWinner(deskPosition: number) : GamePlayer {
     if (deskPosition < 0 || deskPosition >= this._currentRound.length()) {
-      console.log('Invalid deskPosition ' + deskPosition + ' from desk size ' + this._currentRound.length());
-      return undefined;
-    }
-    // só permite setar ganhador quanto todos tiverem jogado na mesa
-    if (!(this._currentRound.length() === this._players.length)) {
-      console.log('Desk length != players.length');
-      return undefined;
+      throw new InvalidDeskPositionError(deskPosition, this._currentRound);
     }
       
+    // só permite setar ganhador quanto todos tiverem jogado na mesa
     // verifica se todos os jogadores da mesa jogaram    
     const playersNotPlayed = this._players.filter((p) => this._currentRound.getPlayedCard(p) === undefined);
-    if (playersNotPlayed.length > 0) {
-      console.log('Players not played: ' + playersNotPlayed.length);
-      return undefined;
+    if (playersNotPlayed.length > 0 || this._currentRound.length() != this._players.length) {
+      throw new DeskNotCompletedError(this._currentRound, this._players, playersNotPlayed);
     }
 
     const winnerDeskItem = this._currentRound.getDeskItemByPosition(deskPosition);

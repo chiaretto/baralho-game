@@ -1,5 +1,6 @@
-import { Application, ErrorRequestHandler, NextFunction, Request, Response } from 'express';
-import createHttpError from 'http-errors';
+import { Application, ErrorRequestHandler, Request, Response } from 'express';
+import { BusinessErrorResponse } from '../controller/response/BusinessErrorResponse';
+import { CustomError } from '../errors/CustomError';
 
 const logErrors: ErrorRequestHandler = (err, req, res, next) => {
   console.error(err.stack);
@@ -22,12 +23,26 @@ const internalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   });
 };
 
-const notFoundErrorHandler = (req: Request, res: Response, next: NextFunction) => {
-  next(createHttpError(404));
+const notFoundErrorHandler = async(req: Request, res: Response) => {
+  res.status(404).send({
+    error: 'Page not found!'
+  });
+};
+
+const customErrors:ErrorRequestHandler = (err, req, res, next) => {
+  if (err instanceof CustomError) {
+    res.status(422);
+    res.json({
+      businessError: BusinessErrorResponse.buildFromCustomError(err)
+    });
+  } else {
+    next(err);
+  }
 };
 
 export const setupErrorHandler = (app: Application) => {  
-  app.use(notFoundErrorHandler);
-  app.use(logErrors);
+  app.all('*', notFoundErrorHandler);
+  app.use(customErrors);
+  app.use(logErrors);  
   app.use(internalErrorHandler);
 };

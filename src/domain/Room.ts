@@ -1,3 +1,5 @@
+import { GameNotForecastedError } from '../errors/GameNotForecastedError';
+import { GameNotStartedError } from '../errors/GameNotStartedError';
 import { Game } from './Game';
 import { GamePlayer } from './GamePlayer';
 import { Player } from './Player';
@@ -18,7 +20,12 @@ export class Room {
     this.currentPlayer = undefined;
   }
 
-  scramble(dealer: Player, quantity: number) {
+  scramble(quantity: number) {
+    let dealer = this.players[0];
+    if (this.currentGame) {
+      dealer = this.nextPlayerRotation(this.currentGame.dealer);
+    }
+
     // Limpa Mesa
     this.newGame(dealer, quantity);
 
@@ -28,23 +35,21 @@ export class Room {
     this.closed = true;
   }
 
-  setCurrentWinnerByDeskPosition(deskPosition: number): Player | undefined {
+  setCurrentWinnerByDeskPosition(deskPosition: number): Player {
     const requiredGame = this.requiredGame;
     if (!requiredGame.isForecasted) {
-      console.info('Game has not been forecasted');
-      return undefined;
+      throw new GameNotForecastedError();
     }
     const winner = requiredGame.setCurrentWinner(deskPosition);
-
-    if (winner) {
-      this.currentPlayer = winner.player;
-      // finalizou game
-      if (winner.cards.length == 0) {
-        this.closed = false;
-        this.players.forEach((p) => p.fullScore += requiredGame.calculateScore(p) ?? 0);
-      }
+    
+    this.currentPlayer = winner.player;
+    // finalizou game
+    if (winner.cards.length == 0) {
+      this.closed = false;
+      this.players.forEach((p) => p.fullScore += requiredGame.calculateScore(p) ?? 0);
     }
-    return winner?.player;
+    
+    return winner.player;
   }
 
   removePlayerByPosition(playerPosition: number): Player | undefined {
@@ -126,7 +131,7 @@ export class Room {
 
   private get requiredGame() : Game {
     if (this.currentGame) return this.currentGame;
-    throw Error('Game has not been started');
+    throw new GameNotStartedError();
   }
 
   private newGame(dealer: Player, quantity: number) {

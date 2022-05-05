@@ -10,6 +10,7 @@ import { GamePlayer } from '../../domain/GamePlayer';
 import { Player } from '../../domain/Player';
 import { RoundRequest } from '../RoomController';
 import { Game } from '../../domain/Game';
+import { BusinessErrorResponse } from '../response/BusinessErrorResponse';
 
 describe('showRoom', () => {
 
@@ -76,7 +77,7 @@ describe('showRoom', () => {
     room.join('PlayerOne', '123');
     room.join('PlayerTwo', '123');
     
-    room.scramble(room.players[0], 3);
+    room.scramble(3);
 
     const player1Response = new RoomPlayerResponse(room.players[0], room);
     const player2Response = new RoomPlayerResponse(room.players[1], room);
@@ -123,7 +124,7 @@ describe('showRoom', () => {
     room.join('PlayerOne', '123');
     room.join('PlayerTwo', '123');
     
-    room.scramble(room.players[0], 3);
+    room.scramble(3);
     room.setForecast(room.players[1], 3);
     room.setForecast(room.players[0], 1);
 
@@ -178,7 +179,7 @@ describe('showRoom', () => {
     //const player1Cards = cards.slice(1, 3);
     const player2Cards = cards.slice(4, 7).sort();
     
-    room.scramble(player1, 3);
+    room.scramble(3);
     room.setForecast(player2, 3);
     room.setForecast(player1, 1);
 
@@ -244,7 +245,7 @@ describe('showRoom', () => {
     const player1Cards = cards.slice(1, 4).sort();
     const player2Cards = cards.slice(4, 7).sort();
     
-    room.scramble(player1, 3);
+    room.scramble(3);
     room.setForecast(player2, 3);
     room.setForecast(player1, 1);
 
@@ -326,8 +327,7 @@ describe('scramble', () => {
   
     const result = await request(app).post('/salas/embaralhar').send();
   
-    expect(result.status).toBe(200);
-    expect(result.body.embaralhado).toBeFalsy();
+    checkBusinessError(result, new BusinessErrorResponse('RoomIsEmptyError', 'Room is empty!', new Map()));
 
     expect(room.closed).toBeFalsy();
     expect(room.currentPlayer).toBeUndefined();
@@ -395,8 +395,10 @@ describe('scramble', () => {
     };
     const result = await request(app).post('/salas/embaralhar').send(reqBody);
   
-    expect(result.status).toBe(200);
-    expect(result.body.embaralhado).toBeFalsy();
+    const errorParams = new Map<string, string>([
+      ['playerName', 'PlayerOne']
+    ]);
+    checkBusinessError(result, new BusinessErrorResponse('PlayerNotFoundError', 'Player with name [PlayerOne] not found!', errorParams));
 
     expect(room.closed).toBeFalsy();
     expect(room.currentPlayer).toBeUndefined();
@@ -415,7 +417,7 @@ describe('scramble', () => {
     const reqBody: RoundRequest = { 
       quantidade: 3,
       nome: 'PlayerOne',
-      senha: '1234'
+      senha: '123'
     };
     const result = await request(app).post('/salas/embaralhar').send(reqBody);
   
@@ -433,13 +435,13 @@ describe('scramble', () => {
     const player1 = room.join('PlayerOne', '123');
     const player2 = room.join('PlayerTwo', '123');
 
-    room.scramble(room.players[0], 3);
+    room.scramble(3);
     repository.currentRoom = room;
   
     const reqBody: RoundRequest = { 
       quantidade: 3,
       nome: 'PlayerOne',
-      senha: '1234'
+      senha: '123'
     };
     const result = await request(app).post('/salas/embaralhar').send(reqBody);
   
@@ -505,6 +507,7 @@ describe('scramble', () => {
       expect(gamePlayer?.forecast).toBeUndefined();
     }
   }
+
 });
 
 describe('setCurrentWinner', () => {
@@ -545,10 +548,8 @@ describe('setCurrentWinner', () => {
     const result = await request(app).post('/salas/setarGanhador').send({
       posicaoCartaVencedora: 0
     });
-        
-    expect(result.status).toBe(500);
-    expect(result.body.error).not.toBeUndefined();
-    expect(result.body.message).toEqual('Game has not been started');
+    
+    checkBusinessError(result, new BusinessErrorResponse('GameNotStartedError', 'Game has not been started!', new Map<string, string>()));
   });
 
   it('should not set winner game not started',async () => {
@@ -562,10 +563,8 @@ describe('setCurrentWinner', () => {
     const result = await request(app).post('/salas/setarGanhador').send({
       posicaoCartaVencedora: 0
     });
-        
-    expect(result.status).toBe(500);
-    expect(result.body.error).not.toBeUndefined();
-    expect(result.body.message).toEqual('Game has not been started');
+    
+    checkBusinessError(result, new BusinessErrorResponse('GameNotStartedError', 'Game has not been started!', new Map<string, string>()));
   });
 
   it('should not set winner game not forecasted',async () => {
@@ -574,16 +573,16 @@ describe('setCurrentWinner', () => {
     room.join('PlayerOne', '123');
     room.join('PlayerTwo', '123');
 
-    room.scramble(room.players[0], 3);
+    room.scramble(3);
 
     repository.currentRoom = room;
     
     const result = await request(app).post('/salas/setarGanhador').send({
       posicaoCartaVencedora: 0
     });
-        
-    expect(result.status).toBe(200);
-    expect(result.body.message).toEqual('Winner not found');
+    
+    const errorParams = new Map<string, string>();
+    checkBusinessError(result, new BusinessErrorResponse('GameNotForecastedError', 'Game is not forecasted!', errorParams));
   });
 
   it('should not set winner empty desk',async () => {
@@ -592,7 +591,7 @@ describe('setCurrentWinner', () => {
     room.join('PlayerOne', '123');
     room.join('PlayerTwo', '123');
 
-    room.scramble(room.players[0], 3);
+    room.scramble(3);
 
     room.setForecast(room.players[1], 2);
     room.setForecast(room.players[0], 2);
@@ -604,8 +603,12 @@ describe('setCurrentWinner', () => {
     });
     
     expect(room.currentGame?.isForecasted).toBeTruthy();
-    expect(result.status).toBe(200);
-    expect(result.body.message).toEqual('Winner not found');
+
+    const errorParams = new Map<string, string>([
+      ['deskPosition', '0'],
+      ['deskSize', '0']
+    ]);
+    checkBusinessError(result, new BusinessErrorResponse('InvalidDeskPositionError', 'Position [0] at desk with size [0] is invalid!', errorParams));
   });
 
   it('should not set winner if any player has not played',async () => {
@@ -614,7 +617,7 @@ describe('setCurrentWinner', () => {
     room.join('PlayerOne', '123');
     room.join('PlayerTwo', '123');
 
-    room.scramble(room.players[0], 3);
+    room.scramble(3);
 
     room.setForecast(room.players[1], 2);
     room.setForecast(room.players[0], 2);
@@ -633,8 +636,13 @@ describe('setCurrentWinner', () => {
     
     expect(room.currentGame?.isForecasted).toBeTruthy();
     expect(room.currentPlayer).toBe(room.players[0]);
-    expect(result.status).toBe(200);
-    expect(result.body.message).toEqual('Winner not found');
+
+    const errorParams = new Map<string, string>([
+      ['notPlayedSize', '1'],
+      ['deskSize', '1'],
+      ['allPlayersSize', '2']
+    ]);
+    checkBusinessError(result, new BusinessErrorResponse('DeskNotCompletedError', 'Players not played 1 with desk size [1] and allPlayers size [2]', errorParams));
   });
 
   it('should have a winner',async () => {
@@ -643,7 +651,7 @@ describe('setCurrentWinner', () => {
     room.join('PlayerOne', '123');
     room.join('PlayerTwo', '123');
 
-    room.scramble(room.players[0], 3);
+    room.scramble(3);
 
     room.setForecast(room.players[1], 2);
     room.setForecast(room.players[0], 2);
@@ -666,4 +674,17 @@ describe('setCurrentWinner', () => {
     expect(result.status).toBe(200);
     expect(result.body.nome).toEqual(room.players[0].name);
   });
+
+
 });  
+
+function checkBusinessError(result: request.Response, errorResponse: BusinessErrorResponse) {
+  expect(result.status).toBe(422);
+  expect(result.body.businessError).not.toBeUndefined();
+  expect(result.body.businessError.type).toEqual(errorResponse.type);
+  expect(result.body.businessError.message).toEqual(errorResponse.message);
+  expect(result.body.businessError.params).toEqual(errorResponse.params);
+  //for(const [key, value] of errorResponse.params.entries()) {
+  //  expect(result.body.businessError.params[key]).toEqual(value);
+  //}
+}

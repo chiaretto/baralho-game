@@ -1,3 +1,5 @@
+import { DeskNotCompletedError } from '../../errors/DeskNotCompletedError';
+import { InvalidDeskPositionError } from '../../errors/InvalidDeskPositionError';
 import { Deck } from '../Deck';
 import { DeskItem } from '../Desk';
 import { Game } from '../Game';
@@ -673,10 +675,11 @@ describe('setCurrentWinner', () => {
     game.playCard(player2, 0);
     
     //when
-    const winner = game.setCurrentWinner(0);
+    const t = () => {game.setCurrentWinner(0);};
       
     //then
-    expect(winner).toBeUndefined();
+    expect(t).toThrow(DeskNotCompletedError);
+    expect(t).toThrow('Players not played 1 with desk size [2] and allPlayers size [3]');
     expect(game.currentRound.length()).toEqual(2);
   });
 
@@ -685,10 +688,11 @@ describe('setCurrentWinner', () => {
     const game = new Game(players[2], players, 3);
     
     //when
-    const winner = game.setCurrentWinner(0);
+    const t = () => { game.setCurrentWinner(0); };
       
     //then
-    expect(winner).toBeUndefined();
+    expect(t).toThrow(InvalidDeskPositionError);
+    expect(t).toThrow('Position [0] at desk with size [0] is invalid!');
     expect(game.currentRound.length()).toEqual(0);
   });
 
@@ -775,10 +779,11 @@ describe('setCurrentWinner', () => {
     game.playCard(player3, 0);
     
     //when
-    const winner = game.setCurrentWinner(3);
+    const t = () => { game.setCurrentWinner(3); };
       
     //then
-    expect(winner).toBeUndefined();
+    expect(t).toThrow(InvalidDeskPositionError);
+    expect(t).toThrow('Position [3] at desk with size [3] is invalid!');
     expect(game.currentRound.length()).toEqual(3);
   });
 
@@ -795,10 +800,11 @@ describe('setCurrentWinner', () => {
     game.playCard(player3, 0);
     
     //when
-    const winner = game.setCurrentWinner(-1);
+    const t = () => { game.setCurrentWinner(-1); };
       
     //then
-    expect(winner).toBeUndefined();
+    expect(t).toThrow(InvalidDeskPositionError);
+    expect(t).toThrow('Position [-1] at desk with size [3] is invalid!');
     expect(game.currentRound.length()).toEqual(3);
   });
 
@@ -815,10 +821,13 @@ describe('setCurrentWinner', () => {
     game.playCard(player2, 0);
     
     //when
-    const winner = game.setCurrentWinner(0);
+    const t = () => {
+      game.setCurrentWinner(0);
+    };
       
     //then
-    expect(winner).toBeUndefined();
+    expect(t).toThrow(DeskNotCompletedError);
+    expect(t).toThrow('Players not played 1 with desk size [3] and allPlayers size [3]');
     expect(game.currentRound.length()).toEqual(3);
   });
 });

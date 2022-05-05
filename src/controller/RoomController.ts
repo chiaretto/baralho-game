@@ -4,6 +4,10 @@ import { repository } from '../database/Repository';
 import { RoomResponse } from './response/RoomResponse';
 import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
 import { RoomScoreDetailedResponse } from './response/score/RoomScoreDetailedResponse';
+import { Player } from '../domain/Player';
+import { Room } from '../domain/Room';
+import { PlayerNotFoundError } from '../errors/PlayerNotFoundError';
+import { RoomIsEmptyError } from '../errors/RoomIsEmptyError';
 
 export interface RoundRequest {
   quantidade: number;
@@ -31,11 +35,11 @@ class RoomController {
     const body: RoundRequest = req.body;
     const room = repository.currentRoom;
 
-    const dealer = room.findRoomPlayer(body.nome, body.senha);
-
+    const player = RoomController.validatePlayer(room, body.nome, body.senha);
+    
     let scrambled = false;
-    if (dealer && !room.closed && body.quantidade > 0) {
-      room.scramble(dealer, body.quantidade);
+    if (player && !room.closed && body.quantidade > 0) {
+      room.scramble(body.quantidade);
 
       scrambled = true;
     }
@@ -72,7 +76,7 @@ class RoomController {
     const body: PlayRequest = req.body;
     const room = repository.currentRoom;
 
-    const player = room.findRoomPlayer(body.nome, body.senha);
+    const player = RoomController.validatePlayer(room, body.nome, body.senha);
 
     let cards: string[] = [];
     if (player && body.posicaoCarta >= 0) {
@@ -88,7 +92,7 @@ class RoomController {
     const body: RoundRequest = req.body;
     const room = repository.currentRoom;
 
-    const player = room.findRoomPlayer(body.nome, body.senha);
+    const player = RoomController.validatePlayer(room, body.nome, body.senha);
 
     if (player) {
       room.setForecast(player, body.quantidade);
@@ -112,6 +116,17 @@ class RoomController {
     const room = repository.currentRoom;
     room.reboot();
     res.json();
+  }
+
+  private static validatePlayer(room: Room, name:string, pwd:string) : Player {
+    if (room.players.length == 0) {
+      throw new RoomIsEmptyError();
+    }
+    const player = room.findRoomPlayer(name, pwd);
+    if (player === undefined) {
+      throw new PlayerNotFoundError(name);
+    }
+    return player;
   }
 }
 

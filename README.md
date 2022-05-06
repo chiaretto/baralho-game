@@ -1,5 +1,8 @@
 # Baralho-Game
 
+[![codecov.io](https://codecov.io/github/chiaretto/baralho-game/coverage.svg)](https://codecov.io/github/chiaretto/baralho-game)
+
+
 * Require NodeJS 14+
 
 ## How to run the Game?

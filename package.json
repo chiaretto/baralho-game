@@ -9,6 +9,7 @@
     "startServer": "npx tsc && node dist/index.js",
     "dev": "export RUN_LOCAL=true && concurrently \"npx tsc --watch\" \"nodemon -q dist/index.js\"",
     "test": "jest",
+    "coverage": "jest --coverage",
     "lint": "eslint --ext .tsx,.ts ."
   },
   "keywords": [],

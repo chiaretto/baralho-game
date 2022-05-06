@@ -4,7 +4,7 @@ import request from 'supertest';
 
 import { app } from '../../app';
 import { RoomPlayerResponse } from '../response/RoomPlayerResponse';
-import { Deck } from '../../domain/Deck';
+import { Card, Deck } from '../../domain/Deck';
 import { RoomDeskItemResponse } from '../response/RoomDesktemResponse';
 import { GamePlayer } from '../../domain/GamePlayer';
 import { Player } from '../../domain/Player';
@@ -209,7 +209,7 @@ describe('showRoom', () => {
 
     const desk: RoomDeskItemResponse[] = [];
 
-    const deskItem = new RoomDeskItemResponse(new GamePlayer(new Player('x','x'), []), '');
+    const deskItem = new RoomDeskItemResponse(new GamePlayer(new Player('x','x'), []), new Card('','',''));
     deskItem.carta = player2Cards[0];
     deskItem.jogador = player2.name;
 
@@ -244,7 +244,7 @@ describe('showRoom', () => {
     const player2 = room.players[1];
     const player1Cards = cards.slice(1, 4).sort();
     const player2Cards = cards.slice(4, 7).sort();
-    
+
     room.scramble(3);
     room.setForecast(player2, 3);
     room.setForecast(player1, 1);
@@ -277,12 +277,12 @@ describe('showRoom', () => {
 
     const desk: RoomDeskItemResponse[] = [];
 
-    const deskItem1 = new RoomDeskItemResponse(new GamePlayer(new Player('x','x'), []), '');
+    const deskItem1 = new RoomDeskItemResponse(new GamePlayer(new Player('x','x'), []), Card.parse(player1Cards[1]));
     deskItem1.carta = player2Cards[0];
     deskItem1.jogador = player2.name;
     desk.push(deskItem1);
 
-    const deskItem2 = new RoomDeskItemResponse(new GamePlayer(new Player('x','x'), []), '');
+    const deskItem2 = new RoomDeskItemResponse(new GamePlayer(new Player('x','x'), []), Card.parse(player1Cards[1]));
     deskItem2.carta = player1Cards[1];
     deskItem2.jogador = player1.name;
     desk.push(deskItem2);
@@ -319,13 +319,18 @@ describe('showRoom', () => {
 
 
 describe('scramble', () => {
+  const scramblePath = '/salas/embaralhar';
+
+  const sendScrambleRequest = async (req: RoundRequest) => {
+    return await request(app).post(scramblePath).send(req);
+  };
 
   it('should not scramble in an empty room',async () => {
     const room = new Room();
 
     repository.currentRoom = room;
   
-    const result = await request(app).post('/salas/embaralhar').send();
+    const result = await request(app).post(scramblePath).send();
   
     checkBusinessError(result, new BusinessErrorResponse('RoomIsEmptyError', 'Room is empty!', new Map()));
 
@@ -347,7 +352,7 @@ describe('scramble', () => {
       nome: 'PlayerOne',
       senha: '123'
     };
-    const result = await request(app).post('/salas/embaralhar').send(reqBody);
+    const result = await sendScrambleRequest(reqBody);
   
     expect(result.status).toBe(200);
     expect(result.body.embaralhado).toBeFalsy();
@@ -370,7 +375,7 @@ describe('scramble', () => {
       nome: 'PlayerOne',
       senha: '123'
     };
-    const result = await request(app).post('/salas/embaralhar').send(reqBody);
+    const result = await sendScrambleRequest(reqBody);
   
     expect(result.status).toBe(200);
     expect(result.body.embaralhado).toBeFalsy();
@@ -393,7 +398,7 @@ describe('scramble', () => {
       nome: 'PlayerOne',
       senha: '1234'
     };
-    const result = await request(app).post('/salas/embaralhar').send(reqBody);
+    const result = await sendScrambleRequest(reqBody);
   
     const errorParams = new Map<string, string>([
       ['playerName', 'PlayerOne']
@@ -419,7 +424,7 @@ describe('scramble', () => {
       nome: 'PlayerOne',
       senha: '123'
     };
-    const result = await request(app).post('/salas/embaralhar').send(reqBody);
+    const result = await sendScrambleRequest(reqBody);
   
     expect(result.status).toBe(200);
     expect(result.body.embaralhado).toBeFalsy();
@@ -443,7 +448,7 @@ describe('scramble', () => {
       nome: 'PlayerOne',
       senha: '123'
     };
-    const result = await request(app).post('/salas/embaralhar').send(reqBody);
+    const result = await sendScrambleRequest(reqBody);
   
     expect(result.status).toBe(200);
     expect(result.body.embaralhado).toBeFalsy();
@@ -477,7 +482,7 @@ describe('scramble', () => {
       nome: 'PlayerOne',
       senha: '123'
     };
-    const result = await request(app).post('/salas/embaralhar').send(reqBody);
+    const result = await sendScrambleRequest(reqBody);
   
     expect(result.status).toBe(200);
     expect(result.body.embaralhado).toBeTruthy();

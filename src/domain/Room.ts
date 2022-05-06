@@ -1,5 +1,6 @@
 import { GameNotForecastedError } from '../errors/GameNotForecastedError';
 import { GameNotStartedError } from '../errors/GameNotStartedError';
+import { PlayerNotFoundError } from '../errors/PlayerNotFoundError';
 import { Game } from './Game';
 import { GamePlayer } from './GamePlayer';
 import { Player } from './Player';
@@ -93,14 +94,17 @@ export class Room {
     this.currentAdmin = isAdmin ? jogador : undefined;
   }
 
-  playCard(player: Player, playerCardPosition: number): string[] {
+  playCard(player: Player, playerCardPosition: number): GamePlayer {
     const requiredGame = this.requiredGame;
     const gamePlayer = requiredGame.findGamePlayer(player);
+    if (!gamePlayer) {
+      throw new PlayerNotFoundError(player.name);
+    }
     if (requiredGame.isForecasted && gamePlayer && this.currentPlayer == player) {      
       requiredGame.playCard(gamePlayer, playerCardPosition);
       this.rotatePlayer();
     }
-    return gamePlayer?.cards ?? [];
+    return gamePlayer;
   }
 
   setForecast(player: Player, forecast: number) : GamePlayer | undefined {

@@ -8,6 +8,7 @@ import { Player } from '../domain/Player';
 import { Room } from '../domain/Room';
 import { PlayerNotFoundError } from '../errors/PlayerNotFoundError';
 import { RoomIsEmptyError } from '../errors/RoomIsEmptyError';
+import { InvalidRequestError } from '../errors/InvalidRequestError';
 
 export interface RoundRequest {
   quantidade: number;
@@ -52,11 +53,7 @@ class RoomController {
   public setCurrentWinner(req: Request, res: Response) {
     const winnerPosition = parseInt(req.body.posicaoCartaVencedora);
     if (isNaN(winnerPosition) || winnerPosition < 0) {
-      res.status(400);
-      res.json({
-        error: 'InvalidPayload',
-        message: 'Invalid card position',
-      });
+      throw new InvalidRequestError('Invalid card position');
     }
 
     const room = repository.currentRoom;
@@ -80,7 +77,7 @@ class RoomController {
 
     let cards: string[] = [];
     if (player && body.posicaoCarta >= 0) {
-      cards = room.playCard(player, body.posicaoCarta);
+      cards = room.playCard(player, body.posicaoCarta).cards.map((c) => c.toString());
     }
 
     res.json({

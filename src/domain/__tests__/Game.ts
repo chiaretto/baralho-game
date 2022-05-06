@@ -1,6 +1,6 @@
 import { DeskNotCompletedError } from '../../errors/DeskNotCompletedError';
 import { InvalidDeskPositionError } from '../../errors/InvalidDeskPositionError';
-import { Deck } from '../Deck';
+import { Card, Deck } from '../Deck';
 import { DeskItem } from '../Desk';
 import { Game } from '../Game';
 import { Player } from '../Player';
@@ -14,11 +14,17 @@ describe('gameSetup', () => {
     const spiedDeck = jest.spyOn(Deck, 'getScrambled');
     spiedDeck.mockReturnValueOnce([...cards]);
 
+    const expectedWildcardStr = cards[0];
+    const expectedPlayer1Cards = [cards[1], cards[2], cards[3]].sort();
+    const expectedPlayer2Cards = [cards[4], cards[5], cards[6]].sort();
+    const wildCardSuit = expectedWildcardStr.slice(-2)[0];
+
     // when
     const game = new Game(players[0], players, 3);
 
     // then
-    expect(game.wildCard).toEqual(cards[0]);
+    expect(game.wildCard).toEqual(Card.parse(cards[0]));
+    expect(game.wildCard.suit).toEqual(wildCardSuit);
     expect(game.id).toEqual(3);
     expect(game.dealer).toBe(players[0]);
     expect(game.currentRound).not.toBeUndefined();
@@ -31,8 +37,33 @@ describe('gameSetup', () => {
     expect(game.players[1].player).toBe(players[1]);
     expect(game.players[1].cards).toHaveLength(3);
 
-    expect(game.players[0].cards).toEqual([cards[1], cards[2], cards[3]].sort());
-    expect(game.players[1].cards).toEqual([cards[4], cards[5], cards[6]].sort());
+    const player1Cards = game.players[0].cards;
+    for(let i = 0; i < 3; ++i) {
+      const card = player1Cards[i];
+      expect(card.toString()).not.toEqual(expectedWildcardStr);
+      expect(card.toString()).toEqual(expectedPlayer1Cards[i]);
+    }
+    const player2Cards = game.players[1].cards;
+    for(let i = 0; i < 3; ++i) {
+      const card = player2Cards[i];
+      expect(card.toString()).not.toEqual(expectedWildcardStr);
+      expect(card.toString()).toEqual(expectedPlayer2Cards[i]);      
+    }
+
+    // check if players has not taken same cards
+    for (let playerPosition = 0; playerPosition < game.players.length-1; ++playerPosition) {
+      const player1 = game.players[playerPosition];
+      for (const player1Card of player1.cards) {
+        for(let player2Position = 1; player2Position < game.players.length; ++player2Position) {
+          const player2 = game.players[player2Position];
+          for (const player2Card of player2.cards) {
+            expect(player1Card).not.toEqual(player2Card);
+            expect(player1Card.toString()).not.toEqual(player2Card.toString());
+          }
+        }
+      }
+    }
+
   });
 
   it('should have different cards from different game with same players',async () => {
@@ -85,7 +116,7 @@ describe('playGameCard', () => {
     expect(firstPlayer.cards).toHaveLength(2);
 
     expect(game.currentRound.getCurrentCards()).toHaveLength(1);
-    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(firstCard, firstPlayer)]);
+    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(firstCard, firstPlayer, 0)]);
   });
 
   it('should play first card from 2 players',async () => {
@@ -106,7 +137,7 @@ describe('playGameCard', () => {
     expect(player2.cards).toHaveLength(2);
 
     expect(game.currentRound.getCurrentCards()).toHaveLength(2);
-    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(player1Card1, player1), new DeskItem(player2Card1, player2)]);
+    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(player1Card1, player1, 0), new DeskItem(player2Card1, player2, 1)]);
   });
 
   it('should play last index card from 2 players',async () => {
@@ -127,7 +158,7 @@ describe('playGameCard', () => {
     expect(player2.cards).toHaveLength(2);
 
     expect(game.currentRound.getCurrentCards()).toHaveLength(2);
-    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(player1Card, player1), new DeskItem(player2Card, player2)]);
+    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(player1Card, player1, 0), new DeskItem(player2Card, player2, 1)]);
   });
 
   it('should not play card if the player has already played',async () => {
@@ -149,7 +180,7 @@ describe('playGameCard', () => {
     expect(player2.cards).toHaveLength(2);
 
     expect(game.currentRound.getCurrentCards()).toHaveLength(2);
-    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(player1Card, player1), new DeskItem(player2Card, player2)]);
+    expect(game.currentRound.getCurrentCards()).toEqual([new DeskItem(player1Card, player1, 0), new DeskItem(player2Card, player2, 1)]);
   });
 });
 

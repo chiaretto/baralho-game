@@ -1,39 +1,45 @@
+import { InvalidDeskPositionError } from '../errors/InvalidDeskPositionError';
+import { Card } from './Deck';
 import { GamePlayer } from './GamePlayer';
 
 export class Desk {
-  private cards: DeskItem[];
+  private _items: DeskItem[];
 
   constructor() {
-    this.cards = [];
+    this._items = [];
   }
 
   length() {
-    return this.cards.length;
+    return this._items.length;
   }
 
   getDeskItemByPosition(position: number) : DeskItem {
-    return this.cards.slice(position, position + 1)[0];
+    const item = this._items.at(position);
+    if (item) return item;
+    throw new InvalidDeskPositionError(position, this);
   }
 
-  playCard(player: GamePlayer, card: string) {
-    this.cards.push(new DeskItem(card, player));
+  playCard(player: GamePlayer, card: Card) {
+    this._items.push(new DeskItem(card, player, this._items.length));
   }
 
   getCurrentCards(): DeskItem[] {
-    return [...this.cards];
+    return [...this._items];
   }
 
   getPlayedCard(player: GamePlayer) : DeskItem | undefined {
-    return this.cards.find((di) => di.player === player);
+    return this._items.find((di) => di.player === player);
   }
 }
 
 export class DeskItem {
-  card: string;
-  player: GamePlayer;
+  readonly card: Card;
+  readonly player: GamePlayer;
+  readonly position: number;
 
-  constructor(card: string, player: GamePlayer) {
+  constructor(card: Card, player: GamePlayer, position: number) {
     this.card = card;
     this.player = player;
+    this.position = position;
   }
 }

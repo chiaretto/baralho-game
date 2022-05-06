@@ -1,19 +1,20 @@
+import { Card } from './Deck';
 import { Player } from './Player';
 
 export class GamePlayer {
   player: Player;
-  cards: string[];
+  cards: Card[];
   score: number;
   forecast?: number;
 
-  constructor(player: Player, cards: string[]) {
+  constructor(player: Player, cards: Card[]) {
     this.player = player;
     this.cards = cards;
     this.score = 0;
     this.forecast = undefined;
   }
 
-  removeCardFromPosition(cardPosition: number): string {
+  removeCardFromPosition(cardPosition: number): Card {
     return this.cards.splice(cardPosition, 1)[0];
   }
 

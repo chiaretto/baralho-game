@@ -1,12 +1,14 @@
-import { Deck } from '../Deck';
+import { Card, Deck } from '../Deck';
 import { Desk } from '../Desk';
 import { GamePlayer } from '../GamePlayer';
 import { Player } from '../Player';
 
 describe('desk', () => {
   const copiedCards = [...Deck.allCards];
-  const playerOne5cards = copiedCards.slice(0, 5);
-  const playerTwo5cards = copiedCards.slice(0, 5);
+  const _playerOne5cardstr = copiedCards.slice(0, 5);
+  const _playerTwo5cardstr = copiedCards.slice(0, 5);
+  const playerOne5cards = _playerOne5cardstr.map((s) => Card.parse(s));
+  const playerTwo5cards = _playerTwo5cardstr.map((s) => Card.parse(s));
   const gamePlayerOne = new GamePlayer(new Player('id123', 'PlayerOne5Cards'), playerOne5cards);
   const gamePlayerTwo = new GamePlayer(new Player('id456', 'PlayerTwo5Cards'), playerTwo5cards);
 

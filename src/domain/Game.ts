@@ -1,4 +1,4 @@
-import { Deck } from './Deck';
+import { Card, Deck } from './Deck';
 import { Desk } from './Desk';
 import { Player } from './Player';
 import { GamePlayer } from './GamePlayer';
@@ -7,7 +7,7 @@ import { DeskNotCompletedError } from '../errors/DeskNotCompletedError';
 
 export class Game {
   id: number;
-  private _wildcard: string;
+  private _wildcard: Card;
   private _currentRound: Desk;
   private _dealer: Player;
   private _players: GamePlayer[];
@@ -17,15 +17,16 @@ export class Game {
     const scrambledDeck = Deck.getScrambled();
     this.id = quantity;
     this._dealer = dealer;
-    this._wildcard = scrambledDeck.splice(0, 1)[0];
+    this._wildcard = Card.parse(scrambledDeck.splice(0, 1)[0]);
     // Distribui as cartas
-    this._players = players.map((p) => new GamePlayer(p, scrambledDeck.splice(0, quantity).sort()));
+
+    this._players = players.map((p) => new GamePlayer(p, this.buildPlayerCards(scrambledDeck, quantity)));
     this._currentRound = new Desk();
     this.newRound();
     this._isForecasted = false;
-  }
+  }  
 
-  get wildCard(): string {
+  get wildCard(): Card {
     return this._wildcard;
   }
 
@@ -130,6 +131,11 @@ export class Game {
 
   findGamePlayer(player: Player) : GamePlayer | undefined {
     return this._players.find((gp) => gp.player === player);
+  }
+
+  private buildPlayerCards(scrambledDeck: string[], quantity: number) : Card[] {
+    const subCards = scrambledDeck.splice(0, quantity).sort();
+    return subCards.map((s) => Card.parse(s));
   }
 
 }

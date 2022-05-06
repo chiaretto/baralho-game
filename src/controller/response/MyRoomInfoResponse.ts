@@ -16,7 +16,7 @@ export class MyRoomInfoResponse {
     this.jogadorAtual = player === room.currentPlayer;
 
     this.dealer = player === room.currentGame?.dealer;
-    this.cartas = room.currentGame?.findGamePlayer(player)?.cards ?? [];
+    this.cartas = room.currentGame?.findGamePlayer(player)?.cards?.map((c) => c.toString()) ?? [];
 
     this.perguntarPrevisao = this.jogadorAtual && !(room.currentGame?.isForecasted ?? false);
     if (this.perguntarPrevisao) {

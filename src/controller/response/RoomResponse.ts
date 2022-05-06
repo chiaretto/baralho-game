@@ -12,7 +12,7 @@ export class RoomResponse {
 
   constructor(room: Room) {
     this.salaFechada = room.closed;
-    this.curingas = room.currentGame?.wildCard ? [room.currentGame.wildCard ?? ''] : [];
+    this.curingas = room.currentGame?.wildCard ? [room.currentGame.wildCard.toString() ?? ''] : [];
 
     const desk = room.currentGame ? room.currentGame.currentRound : new Desk();
 

@@ -1,8 +1,10 @@
 import { Application, ErrorRequestHandler, Request, Response } from 'express';
 import { BusinessErrorResponse } from '../controller/response/BusinessErrorResponse';
 import { CustomError } from '../errors/CustomError';
+import { InvalidRequestError } from '../errors/InvalidRequestError';
 
 const logErrors: ErrorRequestHandler = (err, req, res, next) => {
+  console.log('error ' + err.name);
   console.error(err.stack);
   next(err);
 };
@@ -35,6 +37,12 @@ const customErrors:ErrorRequestHandler = (err, req, res, next) => {
     res.json({
       businessError: BusinessErrorResponse.buildFromCustomError(err)
     });
+  } else if (err instanceof InvalidRequestError) {
+    res.status(400);
+    res.json({
+      error: 'InvalidPayload',
+      message: err.message,
+    });  
   } else {
     next(err);
   }

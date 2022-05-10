@@ -2,7 +2,7 @@ import { Card, Deck } from './Deck';
 import { Desk } from './Desk';
 import { Player } from './Player';
 import { GamePlayer } from './GamePlayer';
-import { InvalidDeskPositionError } from '../errors/InvalidDeskPositionError';
+import { InvalidCardPositionError } from '../errors/InvalidCardPositionError';
 import { DeskNotCompletedError } from '../errors/DeskNotCompletedError';
 
 export class Game {
@@ -50,6 +50,9 @@ export class Game {
 
   playCard(gamePlayer: GamePlayer, cardPosition: number) {
     if (this._currentRound.getPlayedCard(gamePlayer) == undefined) {
+      if (gamePlayer.cards.length <= cardPosition) {
+        throw InvalidCardPositionError.createFromHand(cardPosition, gamePlayer.cards);
+      }
       const card = gamePlayer.removeCardFromPosition(cardPosition);
       this._currentRound.playCard(gamePlayer, card);
     } else {
@@ -59,6 +62,7 @@ export class Game {
 
   setForecast(gamePlayer: GamePlayer, forecast: number) : boolean {
     if (forecast < 0) return false;
+    if (forecast > this.id) return false;
 
     const isLastForecaster = this._players.filter((p) => p.forecast === undefined).length == 1;
 
@@ -104,7 +108,7 @@ export class Game {
 
   setCurrentWinner(deskPosition: number) : GamePlayer {
     if (deskPosition < 0 || deskPosition >= this._currentRound.length()) {
-      throw new InvalidDeskPositionError(deskPosition, this._currentRound);
+      throw InvalidCardPositionError.createFromDesk(deskPosition, this._currentRound);
     }
       
     // só permite setar ganhador quanto todos tiverem jogado na mesa

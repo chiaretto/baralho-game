@@ -2,24 +2,13 @@ import { Request, Response } from 'express';
 import { Deck } from '../domain/Deck';
 import { repository } from '../database/Repository';
 import { RoomResponse } from './response/RoomResponse';
-import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
 import { RoomScoreDetailedResponse } from './response/score/RoomScoreDetailedResponse';
-import { Player } from '../domain/Player';
-import { Room } from '../domain/Room';
-import { PlayerNotFoundError } from '../errors/PlayerNotFoundError';
-import { RoomIsEmptyError } from '../errors/RoomIsEmptyError';
 import { InvalidRequestError } from '../errors/InvalidRequestError';
+import { RequestValidator } from '../util/RequestValidator';
+import { AuthenticatedRequest } from './request/AuthenticatedRequest';
 
-export interface RoundRequest {
+export interface RoundRequest extends AuthenticatedRequest {
   quantidade: number;
-  nome: string;
-  senha: string;
-}
-
-export interface PlayRequest {
-  nome: string;
-  senha: string;
-  posicaoCarta: number;
 }
 
 class RoomController {
@@ -36,7 +25,7 @@ class RoomController {
     const body: RoundRequest = req.body;
     const room = repository.currentRoom;
 
-    const player = RoomController.validatePlayer(room, body.nome, body.senha);
+    const player = RequestValidator.validatePlayer(room, body);
     
     let scrambled = false;
     if (player && !room.closed && body.quantidade > 0) {
@@ -69,36 +58,6 @@ class RoomController {
     }
   }
 
-  public play(req: Request, res: Response) {
-    const body: PlayRequest = req.body;
-    const room = repository.currentRoom;
-
-    const player = RoomController.validatePlayer(room, body.nome, body.senha);
-
-    let cards: string[] = [];
-    if (player && body.posicaoCarta >= 0) {
-      cards = room.playCard(player, body.posicaoCarta).cards.map((c) => c.toString());
-    }
-
-    res.json({
-      cartas: cards,
-    });
-  }
-
-  public setForecast(req: Request, res: Response) {
-    const body: RoundRequest = req.body;
-    const room = repository.currentRoom;
-
-    const player = RoomController.validatePlayer(room, body.nome, body.senha);
-
-    if (player) {
-      room.setForecast(player, body.quantidade);
-      res.json(new MyRoomInfoResponse(player, room));
-    } else {
-      res.json();
-    }
-  }
-
   public fullScore(req: Request, res: Response) {
     res.json(new RoomScoreDetailedResponse(repository.currentRoom));
   }
@@ -115,16 +74,6 @@ class RoomController {
     res.json();
   }
 
-  private static validatePlayer(room: Room, name:string, pwd:string) : Player {
-    if (room.players.length == 0) {
-      throw new RoomIsEmptyError();
-    }
-    const player = room.findRoomPlayer(name, pwd);
-    if (player === undefined) {
-      throw new PlayerNotFoundError(name);
-    }
-    return player;
-  }
 }
 
 export const roomController = new RoomController();

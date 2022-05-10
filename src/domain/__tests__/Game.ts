@@ -1,5 +1,5 @@
 import { DeskNotCompletedError } from '../../errors/DeskNotCompletedError';
-import { InvalidDeskPositionError } from '../../errors/InvalidDeskPositionError';
+import { InvalidCardPositionError } from '../../errors/InvalidCardPositionError';
 import { Card, Deck } from '../Deck';
 import { DeskItem } from '../Desk';
 import { Game } from '../Game';
@@ -188,7 +188,7 @@ describe('playGameCard', () => {
 describe('gameSetForecast', () => {
   const players = [new Player('id123', 'PlayerOne'), new Player('id456', 'PlayerTwo'), new Player('id789', 'PlayerThree')];
 
-  it('should set valid forecast first player',async () => {
+  it('should set valid forecast current first player',async () => {
     //given
     const game = new Game(players[2], players, 3);
     const gamePlayers = game.players;
@@ -722,7 +722,7 @@ describe('setCurrentWinner', () => {
     const t = () => { game.setCurrentWinner(0); };
       
     //then
-    expect(t).toThrow(InvalidDeskPositionError);
+    expect(t).toThrow(InvalidCardPositionError);
     expect(t).toThrow('Position [0] at desk with size [0] is invalid!');
     expect(game.currentRound.length()).toEqual(0);
   });
@@ -813,7 +813,7 @@ describe('setCurrentWinner', () => {
     const t = () => { game.setCurrentWinner(3); };
       
     //then
-    expect(t).toThrow(InvalidDeskPositionError);
+    expect(t).toThrow(InvalidCardPositionError);
     expect(t).toThrow('Position [3] at desk with size [3] is invalid!');
     expect(game.currentRound.length()).toEqual(3);
   });
@@ -834,7 +834,7 @@ describe('setCurrentWinner', () => {
     const t = () => { game.setCurrentWinner(-1); };
       
     //then
-    expect(t).toThrow(InvalidDeskPositionError);
+    expect(t).toThrow(InvalidCardPositionError);
     expect(t).toThrow('Position [-1] at desk with size [3] is invalid!');
     expect(game.currentRound.length()).toEqual(3);
   });

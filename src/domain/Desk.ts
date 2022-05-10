@@ -1,4 +1,4 @@
-import { InvalidDeskPositionError } from '../errors/InvalidDeskPositionError';
+import { InvalidCardPositionError } from '../errors/InvalidCardPositionError';
 import { Card } from './Deck';
 import { GamePlayer } from './GamePlayer';
 
@@ -16,7 +16,7 @@ export class Desk {
   getDeskItemByPosition(position: number) : DeskItem {
     const item = this._items.at(position);
     if (item) return item;
-    throw new InvalidDeskPositionError(position, this);
+    throw InvalidCardPositionError.createFromDesk(position, this);
   }
 
   playCard(player: GamePlayer, card: Card) {

@@ -610,10 +610,10 @@ describe('setCurrentWinner', () => {
     expect(room.currentGame?.isForecasted).toBeTruthy();
 
     const errorParams = new Map<string, string>([
-      ['deskPosition', '0'],
-      ['deskSize', '0']
+      ['position', '0'],
+      ['size', '0']
     ]);
-    checkBusinessError(result, new BusinessErrorResponse('InvalidDeskPositionError', 'Position [0] at desk with size [0] is invalid!', errorParams));
+    checkBusinessError(result, new BusinessErrorResponse('InvalidCardPositionError', 'Position [0] at desk with size [0] is invalid!', errorParams));
   });
 
   it('should not set winner if any player has not played',async () => {

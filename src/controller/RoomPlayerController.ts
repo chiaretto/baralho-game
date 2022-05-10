@@ -1,17 +1,13 @@
 import { Request, Response } from 'express';
 import { repository } from '../database/Repository';
+import { RequestValidator } from '../util/RequestValidator';
+import { AuthenticatedRequest } from './request/AuthenticatedRequest';
 import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
 import { NewPlayerResponse } from './response/NewPlayerResponse';
 
 interface JoinRequest {
   nome: string;
 }
-
-interface PlayerRequest {
-  nome: string;
-  senha: string;
-}
-
 class RoomPlayerController {
 
   public join(req: Request, res: Response) {
@@ -28,10 +24,10 @@ class RoomPlayerController {
   }
 
   public leave(req: Request, res: Response) {
-    const body: PlayerRequest = req.body;
+    const body: AuthenticatedRequest = req.body;
 
     const room = repository.currentRoom;
-    const player = room.findRoomPlayer(body.nome, body.senha);
+    const player = RequestValidator.validatePlayer(room, body);
 
     if (player) {
       room.leave(player);
@@ -55,10 +51,10 @@ class RoomPlayerController {
   }
 
   public turnOnAdmin(req: Request, res: Response) {
-    const body: PlayerRequest = req.body;
+    const body: AuthenticatedRequest = req.body;
 
     const room = repository.currentRoom;
-    const player = room.findRoomPlayer(body.nome, body.senha);
+    const player = RequestValidator.validatePlayer(room, body);
 
     if (player) {
       room.changeAdmin(player, true);
@@ -71,10 +67,10 @@ class RoomPlayerController {
   }
 
   public turnOffAdmin(req: Request, res: Response) {
-    const body: PlayerRequest = req.body;
+    const body: AuthenticatedRequest = req.body;
 
     const room = repository.currentRoom;
-    const player = room.findRoomPlayer(body.nome, body.senha);
+    const player = RequestValidator.validatePlayer(room, body);
 
     if (player) {
       room.changeAdmin(player, false);
@@ -87,16 +83,11 @@ class RoomPlayerController {
   }
 
   public viewOwnCards(req: Request, res: Response) {
-    const body: PlayerRequest = req.body;
+    const body: AuthenticatedRequest = req.body;
 
     const room = repository.currentRoom;
-    const player = room.findRoomPlayer(body.nome, body.senha);
-
-    if (player) {
-      res.json(new MyRoomInfoResponse(player, room));
-    } else {
-      res.json();
-    }
+    const player = RequestValidator.validatePlayer(room, body);
+    res.json(MyRoomInfoResponse.fromPlayer(player, room));
   }
 
 }

@@ -1,3 +1,4 @@
+import { GamePlayer } from '../../domain/GamePlayer';
 import { Player } from '../../domain/Player';
 import { Room } from '../../domain/Room';
 
@@ -9,18 +10,40 @@ export class MyRoomInfoResponse {
   jogadorAtual: boolean;
   perguntarPrevisao: boolean;
   restricaoPrevisao?: number;
+  previsao?: number;
 
-  constructor(player: Player, room: Room) {
+  constructor(player: Player, room: Room, gamePlayer?: GamePlayer) {
     this.nome = player.name;
     this.admin = player === room.currentAdmin;
     this.jogadorAtual = player === room.currentPlayer;
 
-    this.dealer = player === room.currentGame?.dealer;
-    this.cartas = room.currentGame?.findGamePlayer(player)?.cards?.map((c) => c.toString()) ?? [];
+    const currentGame = room.currentGame;
+    if (currentGame) {
+      this.dealer = player === currentGame.dealer;
 
-    this.perguntarPrevisao = this.jogadorAtual && !(room.currentGame?.isForecasted ?? false);
-    if (this.perguntarPrevisao) {
-      this.restricaoPrevisao = room.currentGame?.getForecastRestriction(player);
+      this.perguntarPrevisao = this.jogadorAtual && !currentGame.isForecasted;
+      if (this.perguntarPrevisao) {
+        this.restricaoPrevisao = currentGame.getForecastRestriction(player);
+      }
+    } else {
+      this.dealer = false;
+      this.perguntarPrevisao = false;
     }
+
+    if (gamePlayer) {
+      this.cartas = gamePlayer.cards?.map((c) => c.toString());
+      this.previsao = gamePlayer.forecast;
+    } else {
+      this.cartas = [];
+    }
+  }
+
+  static fromPlayer(player: Player, room: Room) : MyRoomInfoResponse {
+    const gamePlayer = room.currentGame?.findGamePlayer(player);
+    return new MyRoomInfoResponse(player, room, gamePlayer);
+  }
+
+  static fromGamePlayer(gamePlayer: GamePlayer, room: Room) : MyRoomInfoResponse {
+    return new MyRoomInfoResponse(gamePlayer.player, room, gamePlayer);
   }
 }

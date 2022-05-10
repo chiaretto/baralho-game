@@ -1,3 +1,4 @@
+import { ForecastNotAllowedError } from '../errors/ForecastNotAllowedError';
 import { GameNotForecastedError } from '../errors/GameNotForecastedError';
 import { GameNotStartedError } from '../errors/GameNotStartedError';
 import { PlayerNotFoundError } from '../errors/PlayerNotFoundError';
@@ -100,21 +101,27 @@ export class Room {
     if (!gamePlayer) {
       throw new PlayerNotFoundError(player.name);
     }
-    if (requiredGame.isForecasted && gamePlayer && this.currentPlayer == player) {      
+    if (!requiredGame.isForecasted) {
+      throw new GameNotForecastedError();
+    }
+    if (this.currentPlayer == player) {
       requiredGame.playCard(gamePlayer, playerCardPosition);
       this.rotatePlayer();
     }
     return gamePlayer;
   }
 
-  setForecast(player: Player, forecast: number) : GamePlayer | undefined {
+  setForecast(player: Player, forecast: number) : GamePlayer {
     const requiredGame = this.requiredGame;
     const gamePlayer = requiredGame.findGamePlayer(player);
-    if (gamePlayer && this.currentPlayer == player && forecast >= 0) {
+    if (!gamePlayer) {
+      throw new PlayerNotFoundError(player.name);
+    }
+    if (this.currentPlayer == player && forecast >= 0) {      
       if (requiredGame.setForecast(gamePlayer, forecast)) {
         this.rotatePlayer();
       } else {
-        console.log('Forecast not allowed for player ' + player.name + ' - ' + forecast);
+        throw new ForecastNotAllowedError(player.name, forecast);        
       }
     }
     return gamePlayer;
@@ -148,7 +155,10 @@ export class Room {
   }
 
   private rotatePlayer() {
-    if (this.players.length == 0) return;
+    if (this.players.length == 0) {
+      this.currentPlayer = undefined;
+      return;
+    }
     if (this.currentPlayer) {
       this.currentPlayer = this.nextPlayerRotation(this.currentPlayer);
     } else {

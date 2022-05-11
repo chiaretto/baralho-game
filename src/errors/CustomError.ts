@@ -7,7 +7,8 @@ export class CustomError extends Error {
     this.params = new Map<string, string>();
   }
 
-  protected addParam(key: string, value: string | number) {
-    this.params.set(key, value.toString());
+  protected addParam(key: string, value: string | number | undefined) {
+    if (value)
+      this.params.set(key, value.toString());
   }
 }

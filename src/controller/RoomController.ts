@@ -3,7 +3,6 @@ import { Deck } from '../domain/Deck';
 import { repository } from '../database/Repository';
 import { RoomResponse } from './response/RoomResponse';
 import { RoomScoreDetailedResponse } from './response/score/RoomScoreDetailedResponse';
-import { InvalidRequestError } from '../errors/InvalidRequestError';
 import { RequestValidator } from '../util/RequestValidator';
 import { AuthenticatedRequest } from './request/AuthenticatedRequest';
 
@@ -28,10 +27,8 @@ class RoomController {
     const player = RequestValidator.validatePlayer(room, body);
     
     let scrambled = false;
-    if (player && !room.closed && body.quantidade > 0) {
-      room.scramble(body.quantidade);
-
-      scrambled = true;
+    if (!room.closed && body.quantidade > 0) {
+      scrambled = room.scramble(body.quantidade, player);
     }
 
     res.json({
@@ -40,22 +37,15 @@ class RoomController {
   }
 
   public setCurrentWinner(req: Request, res: Response) {
-    const winnerPosition = parseInt(req.body.posicaoCartaVencedora);
-    if (isNaN(winnerPosition) || winnerPosition < 0) {
-      throw new InvalidRequestError('Invalid card position');
-    }
-
+    const body: AuthenticatedRequest = req.body;
+    
     const room = repository.currentRoom;
-    const winner = room.setCurrentWinnerByDeskPosition(winnerPosition);
-    if (winner) {
-      res.json({
-        nome: winner.name,
-      });
-    } else {
-      res.json({
-        message: 'Winner not found',
-      });
-    }
+    RequestValidator.validatePlayer(room, body);
+    
+    const winner = room.setFinishDesk();
+    res.json({
+      nome: winner.name,
+    });
   }
 
   public fullScore(req: Request, res: Response) {

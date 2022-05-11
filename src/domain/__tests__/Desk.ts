@@ -28,11 +28,12 @@ describe('desk', () => {
     desk.playCard(gamePlayerOne, playerOne5cards[1]);
 
     //when
-    const deskItem = desk.getDeskItemByPosition(0);
+    const deskItem = desk.getCurrentCards()[0];
 
     //then
     expect(deskItem.player).toEqual(gamePlayerOne);
     expect(deskItem.card).toEqual(playerOne5cards[1]);
+    expect(deskItem.position).toEqual(0);
   });
 
   it('should play 2 cards return the 1st card from position 0 from 2 played cards', async() => {
@@ -42,11 +43,12 @@ describe('desk', () => {
     desk.playCard(gamePlayerTwo, playerTwo5cards[2]);
 
     //when
-    const deskItem = desk.getDeskItemByPosition(0);
+    const deskItem = desk.getCurrentCards()[0];
 
     //then
     expect(deskItem.player).toEqual(gamePlayerOne);
     expect(deskItem.card).toEqual(playerOne5cards[1]);
+    expect(deskItem.position).toEqual(0);
   });
 
   it('should play 2 cards return the 2nd card from position 1 from 2 played cards', async() => {
@@ -56,11 +58,12 @@ describe('desk', () => {
     desk.playCard(gamePlayerTwo, playerTwo5cards[2]);
 
     //when
-    const deskItem = desk.getDeskItemByPosition(1);
+    const deskItem = desk.getCurrentCards()[1];
 
     //then
     expect(deskItem.player).toEqual(gamePlayerTwo);
     expect(deskItem.card).toEqual(playerTwo5cards[2]);
+    expect(deskItem.position).toEqual(1);
   });
 
   it('should play 2 cards return the correct card from each player', async() => {
@@ -76,8 +79,11 @@ describe('desk', () => {
     //then
     expect(playerOneCard?.player).toEqual(gamePlayerOne);
     expect(playerOneCard?.card).toEqual(playerOne5cards[1]);
+    expect(playerOneCard?.position).toEqual(0);
+
     expect(playerTwoCard?.player).toEqual(gamePlayerTwo);
     expect(playerTwoCard?.card).toEqual(playerTwo5cards[2]);
+    expect(playerTwoCard?.position).toEqual(1);
   });
 
   it('should play 1 cards return the empty played card from player 2', async() => {
@@ -92,6 +98,7 @@ describe('desk', () => {
     //then
     expect(playerOneCard?.player).toEqual(gamePlayerOne);
     expect(playerOneCard?.card).toEqual(playerOne5cards[1]);
+    expect(playerOneCard?.position).toEqual(0);
     expect(playerTwoCard).toBeUndefined();
   });
 });

@@ -273,6 +273,8 @@
                   this.setandoGanhador = true
                   axios.post(this.host + "/salas/setarGanhador",
                       {
+                        "nome": this.nome,
+                        "senha": this.senha,
                         "posicaoCartaVencedora": index
                       }
                   ).then(() => {
@@ -331,6 +333,8 @@
                   this.removendoJogador = true
                   axios.post(this.host + "/salas/removerJogador",
                       {
+                        "nome": this.nome,
+                        "senha": this.senha,
                         "posicaoJogadorRemovido": index
                       }
                   ).then(() => {

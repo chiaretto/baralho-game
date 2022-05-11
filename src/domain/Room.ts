@@ -1,6 +1,7 @@
 import { ForecastNotAllowedError } from '../errors/ForecastNotAllowedError';
 import { GameNotForecastedError } from '../errors/GameNotForecastedError';
 import { GameNotStartedError } from '../errors/GameNotStartedError';
+import { PlayerAlreadyExistsError } from '../errors/PlayerAlreadyExistsError';
 import { PlayerNotFoundError } from '../errors/PlayerNotFoundError';
 import { Game } from './Game';
 import { GamePlayer } from './GamePlayer';
@@ -22,11 +23,13 @@ export class Room {
     this.currentPlayer = undefined;
   }
 
-  scramble(quantity: number) {
+  scramble(quantity: number, player?: Player) : boolean {
     let dealer = this.players[0];
     if (this.currentGame) {
       dealer = this.nextPlayerRotation(this.currentGame.dealer);
     }
+
+    if (player && player != dealer) return false;
 
     // Limpa Mesa
     this.newGame(dealer, quantity);
@@ -35,14 +38,15 @@ export class Room {
     this.currentPlayer = dealer;
     this.rotatePlayer();
     this.closed = true;
+    return true;
   }
 
-  setCurrentWinnerByDeskPosition(deskPosition: number): Player {
+  setFinishDesk(): Player {
     const requiredGame = this.requiredGame;
     if (!requiredGame.isForecasted) {
       throw new GameNotForecastedError();
     }
-    const winner = requiredGame.setCurrentWinner(deskPosition);
+    const winner = requiredGame.finishDesk();
     
     this.currentPlayer = winner.player;
     // finalizou game
@@ -62,11 +66,10 @@ export class Room {
     return undefined;
   }
 
-  join(name: string, passwd: string): Player | undefined {
+  join(name: string, passwd: string): Player {
     const oldPlayer = Player.findPlayerByName(this.players, name);
     if (oldPlayer) {
-      console.log('There is already a player named: ' + name);
-      return undefined;
+      throw new PlayerAlreadyExistsError(name);
     }
 
     const id = this.buildPlayerId(name, passwd);

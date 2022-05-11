@@ -1,9 +1,10 @@
 import { Card, Deck } from './Deck';
-import { Desk } from './Desk';
+import { Desk, DeskItem } from './Desk';
 import { Player } from './Player';
 import { GamePlayer } from './GamePlayer';
 import { InvalidCardPositionError } from '../errors/InvalidCardPositionError';
 import { DeskNotCompletedError } from '../errors/DeskNotCompletedError';
+import { DeskCardComparator } from '../util/DeskCardComparator';
 
 export class Game {
   id: number;
@@ -18,8 +19,8 @@ export class Game {
     this.id = quantity;
     this._dealer = dealer;
     this._wildcard = Card.parse(scrambledDeck.splice(0, 1)[0]);
-    // Distribui as cartas
 
+    // Distribui as cartas
     this._players = players.map((p) => new GamePlayer(p, this.buildPlayerCards(scrambledDeck, quantity)));
     this._currentRound = new Desk();
     this.newRound();
@@ -106,11 +107,7 @@ export class Game {
     }
   }
 
-  setCurrentWinner(deskPosition: number) : GamePlayer {
-    if (deskPosition < 0 || deskPosition >= this._currentRound.length()) {
-      throw InvalidCardPositionError.createFromDesk(deskPosition, this._currentRound);
-    }
-      
+  finishDesk() : GamePlayer {     
     // só permite setar ganhador quanto todos tiverem jogado na mesa
     // verifica se todos os jogadores da mesa jogaram    
     const playersNotPlayed = this._players.filter((p) => this._currentRound.getPlayedCard(p) === undefined);
@@ -118,7 +115,7 @@ export class Game {
       throw new DeskNotCompletedError(this._currentRound, this._players, playersNotPlayed);
     }
 
-    const winnerDeskItem = this._currentRound.getDeskItemByPosition(deskPosition);
+    const winnerDeskItem = this.getWinner();
   
     // identifica jogador da carta vencedora e soma ponto
     //const player = Player.findPlayerByName(this.players, playerName);
@@ -140,6 +137,14 @@ export class Game {
   private buildPlayerCards(scrambledDeck: string[], quantity: number) : Card[] {
     const subCards = scrambledDeck.splice(0, quantity).sort();
     return subCards.map((s) => Card.parse(s));
+  }
+
+  private getWinner() : DeskItem {
+    const list = this._currentRound.getCurrentCards();
+    const comparator = new DeskCardComparator(this._wildcard);
+
+    list.sort(comparator.deskItemComparator).reverse();
+    return list[0];
   }
 
 }

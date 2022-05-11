@@ -1,13 +1,19 @@
 import { Request, Response } from 'express';
 import { repository } from '../database/Repository';
+import { PlayerIsNotAdminError } from '../errors/PlayerIsNotAdminError';
 import { RequestValidator } from '../util/RequestValidator';
 import { AuthenticatedRequest } from './request/AuthenticatedRequest';
 import { MyRoomInfoResponse } from './response/MyRoomInfoResponse';
 import { NewPlayerResponse } from './response/NewPlayerResponse';
 
-interface JoinRequest {
+export interface JoinRequest {
   nome: string;
 }
+
+export interface RemovePlayerRequest extends AuthenticatedRequest {
+  posicaoJogadorRemovido: number;
+}
+
 class RoomPlayerController {
 
   public join(req: Request, res: Response) {
@@ -18,8 +24,7 @@ class RoomPlayerController {
 
     if (!room.closed) {      
       const newPlayer = room.join(body.nome, pwd);
-      if (newPlayer)
-        res.json(new NewPlayerResponse(newPlayer, pwd));
+      res.json(new NewPlayerResponse(newPlayer, pwd));
     }
   }
 
@@ -28,22 +33,24 @@ class RoomPlayerController {
 
     const room = repository.currentRoom;
     const player = RequestValidator.validatePlayer(room, body);
-
-    if (player) {
-      room.leave(player);
-    }
+    room.leave(player);
 
     res.json({
-      left: player?.name,
+      nome: player.name,
     });
   }
 
   public removePlayerByPosition(req: Request, res: Response) {
-    const playerPosition = parseInt(req.body.posicaoJogadorRemovido);
+    const body: RemovePlayerRequest = req.body;
 
     const room = repository.currentRoom;
+    const playerAdmin = RequestValidator.validatePlayer(room, body);
 
-    const player = room.removePlayerByPosition(playerPosition);
+    if (room.currentAdmin != playerAdmin) {
+      throw new PlayerIsNotAdminError(body.nome);
+    }
+
+    const player = room.removePlayerByPosition(body.posicaoJogadorRemovido);
 
     res.json({
       removido: player?.name,
@@ -56,12 +63,10 @@ class RoomPlayerController {
     const room = repository.currentRoom;
     const player = RequestValidator.validatePlayer(room, body);
 
-    if (player) {
-      room.changeAdmin(player, true);
-    }
+    room.changeAdmin(player, true);
 
     res.json({
-      player: player?.name,
+      player: player.name,
       isAdmin: player === room.currentAdmin,
     });
   }
@@ -72,12 +77,10 @@ class RoomPlayerController {
     const room = repository.currentRoom;
     const player = RequestValidator.validatePlayer(room, body);
 
-    if (player) {
-      room.changeAdmin(player, false);
-    }
+    room.changeAdmin(player, false);
 
     res.json({
-      player: player?.name,
+      player: player.name,
       isAdmin: player === room.currentAdmin,
     });
   }

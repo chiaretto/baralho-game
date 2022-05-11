@@ -1,5 +1,4 @@
 import { DeskNotCompletedError } from '../../errors/DeskNotCompletedError';
-import { InvalidCardPositionError } from '../../errors/InvalidCardPositionError';
 import { Card, Deck } from '../Deck';
 import { DeskItem } from '../Desk';
 import { Game } from '../Game';
@@ -602,10 +601,15 @@ describe('gameScoreCalculate', () => {
 
 describe('getForecastRestriction', () => {
   const players = [new Player('id123', 'PlayerOne'), new Player('id456', 'PlayerTwo'), new Player('id789', 'PlayerThree')];
-    
+  const SCRAMBLE_QUANTITY = 3;
+
+  const setupGame = () : Game => {
+    return new Game(players[2], players, SCRAMBLE_QUANTITY);
+  };
+
   it('should not have forecast restriction for not dealer and none forecast',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -621,7 +625,7 @@ describe('getForecastRestriction', () => {
     
   it('should not have forecast restriction for not dealer and some forecast done',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -639,7 +643,7 @@ describe('getForecastRestriction', () => {
 
   it('should have positive forecast restriction for dealer',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -657,7 +661,7 @@ describe('getForecastRestriction', () => {
 
   it('should have zero value forecast restriction for dealer',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -675,7 +679,7 @@ describe('getForecastRestriction', () => {
 
   it('should have negative value forecast restriction for dealer',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -692,12 +696,29 @@ describe('getForecastRestriction', () => {
   });
 });
 
-describe('setCurrentWinner', () => {
-  const players = [new Player('id123', 'PlayerOne'), new Player('id456', 'PlayerTwo'), new Player('id789', 'PlayerThree')];
+describe('setCurrentWinner', () => {const players = [new Player('id123', 'PlayerOne'), new Player('id456', 'PlayerTwo'), new Player('id789', 'PlayerThree')];
+  const SCRAMBLE_QUANTITY = 4;
+
+  const setupGame = () : Game => {
+    return new Game(players[2], players, SCRAMBLE_QUANTITY);
+  };
+
+  beforeEach(() => {
+    const cards = ['2♣r', // wildcard
+      'A♦r', 'K♠b', 'Q♠b', 'J♠b', // player 0
+      '10♠b', '9♠b', '8♠b', '7♠b', // player 1
+      '6♠b', '5♠b', '4♠b', '3♠b', // player 2
+
+      '2♠b', 'A♠b', '3♠r', '9♠r', '10♠r', '2♠r', '5♦b', '8♦b', '10♦b', '2♣r', 'A♣r', '5♣r', '3♣r', '3♣b', 'J♣r',
+      '2♥b', '2♥r', '3♥b', 'A♥b', 'J♥b', '5♥r', '9♥r', '10♥r'];
+
+    const spiedDeck = jest.spyOn(Deck, 'getScrambled');
+    spiedDeck.mockReturnValueOnce([...cards]);
+  });
      
   it('should not have winner if there is at least one player not played',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -706,7 +727,7 @@ describe('setCurrentWinner', () => {
     game.playCard(player2, 0);
     
     //when
-    const t = () => {game.setCurrentWinner(0);};
+    const t = () => { game.finishDesk(); };
       
     //then
     expect(t).toThrow(DeskNotCompletedError);
@@ -716,20 +737,20 @@ describe('setCurrentWinner', () => {
 
   it('should not have winner if there is no card played',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     
     //when
-    const t = () => { game.setCurrentWinner(0); };
+    const t = () => { game.finishDesk(); };
       
     //then
-    expect(t).toThrow(InvalidCardPositionError);
-    expect(t).toThrow('Position [0] at desk with size [0] is invalid!');
+    expect(t).toThrow(DeskNotCompletedError);
+    expect(t).toThrow('Players not played 3 with desk size [0] and allPlayers size [3]');
     expect(game.currentRound.length()).toEqual(0);
   });
 
-  it('should have winner from first card at desk',async () => {
+  it('should have winner',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -740,7 +761,7 @@ describe('setCurrentWinner', () => {
     game.playCard(player3, 0);
     
     //when
-    const winner = game.setCurrentWinner(0);
+    const winner = game.finishDesk();
       
     //then
     expect(winner).toBe(player1);
@@ -749,99 +770,9 @@ describe('setCurrentWinner', () => {
     expect(game.currentRound.length()).toEqual(0);
   });
 
-  it('should have winner from mid card at desk',async () => {
-    //given
-    const game = new Game(players[2], players, 3);
-    const gamePlayers = game.players;
-    const player1 = gamePlayers[0];
-    const player2 = gamePlayers[1];
-    const player3 = gamePlayers[2];
-
-    player2.score = 2;
-    
-    game.playCard(player1, 0);
-    game.playCard(player2, 0);
-    game.playCard(player3, 0);
-    
-    //when
-    const winner = game.setCurrentWinner(1);
-      
-    //then
-    expect(winner).toBe(player2);
-    expect(winner?.score).toEqual(3);
-    // new round
-    expect(game.currentRound.length()).toEqual(0);
-  });
-
-  it('should have winner from last card at desk',async () => {
-    //given
-    const game = new Game(players[2], players, 3);
-    const gamePlayers = game.players;
-    const player1 = gamePlayers[0];
-    const player2 = gamePlayers[1];
-    const player3 = gamePlayers[2];
-
-    player2.score = 2;
-    
-    game.playCard(player1, 0);
-    game.playCard(player2, 0);
-    game.playCard(player3, 0);
-    
-    //when
-    const winner = game.setCurrentWinner(2);
-      
-    //then
-    expect(winner).toBe(player3);
-    expect(winner?.score).toEqual(1);
-    // new round
-    expect(game.currentRound.length()).toEqual(0);
-  });
-
-  it('should not have winner from invalid desk position',async () => {
-    //given
-    const game = new Game(players[2], players, 3);
-    const gamePlayers = game.players;
-    const player1 = gamePlayers[0];
-    const player2 = gamePlayers[1];
-    const player3 = gamePlayers[2];
-    
-    game.playCard(player1, 0);
-    game.playCard(player2, 0);
-    game.playCard(player3, 0);
-    
-    //when
-    const t = () => { game.setCurrentWinner(3); };
-      
-    //then
-    expect(t).toThrow(InvalidCardPositionError);
-    expect(t).toThrow('Position [3] at desk with size [3] is invalid!');
-    expect(game.currentRound.length()).toEqual(3);
-  });
-
-  it('should not have winner from invalid desk position',async () => {
-    //given
-    const game = new Game(players[2], players, 3);
-    const gamePlayers = game.players;
-    const player1 = gamePlayers[0];
-    const player2 = gamePlayers[1];
-    const player3 = gamePlayers[2];
-    
-    game.playCard(player1, 0);
-    game.playCard(player2, 0);
-    game.playCard(player3, 0);
-    
-    //when
-    const t = () => { game.setCurrentWinner(-1); };
-      
-    //then
-    expect(t).toThrow(InvalidCardPositionError);
-    expect(t).toThrow('Position [-1] at desk with size [3] is invalid!');
-    expect(game.currentRound.length()).toEqual(3);
-  });
-
   it('should not have winner any player not played and desk length ok',async () => {
     //given
-    const game = new Game(players[2], players, 3);
+    const game = setupGame();
     const gamePlayers = game.players;
     const player1 = gamePlayers[0];
     const player2 = gamePlayers[1];
@@ -852,9 +783,7 @@ describe('setCurrentWinner', () => {
     game.playCard(player2, 0);
     
     //when
-    const t = () => {
-      game.setCurrentWinner(0);
-    };
+    const t = () => { game.finishDesk(); };
       
     //then
     expect(t).toThrow(DeskNotCompletedError);

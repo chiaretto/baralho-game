@@ -11,6 +11,8 @@ import { Player } from '../../domain/Player';
 import { RoundRequest } from '../RoomController';
 import { Game } from '../../domain/Game';
 import { BusinessErrorResponse } from '../response/BusinessErrorResponse';
+import { AuthenticatedRequest } from '../request/AuthenticatedRequest';
+import { checkBusinessError, checkInvalidRequestError } from './__utils__/TestHelper';
 
 describe('showRoom', () => {
 
@@ -325,14 +327,32 @@ describe('scramble', () => {
     return await request(app).post(scramblePath).send(req);
   };
 
-  it('should not scramble in an empty room',async () => {
+  it('should not scramble an empty payload',async () => {
     const room = new Room();
 
     repository.currentRoom = room;
   
     const result = await request(app).post(scramblePath).send();
   
-    checkBusinessError(result, new BusinessErrorResponse('RoomIsEmptyError', 'Room is empty!', new Map()));
+    checkInvalidRequestError(result, 'Invalid auth request');
+
+    expect(room.closed).toBeFalsy();
+    expect(room.currentPlayer).toBeUndefined();
+    expect(room.currentGame).toBeUndefined();    
+  });
+
+  it('should not scramble in an empty room',async () => {
+    const room = new Room();
+
+    repository.currentRoom = room;
+  
+    const result = await sendScrambleRequest({
+      nome: '123',
+      senha: '123',
+      quantidade: 3
+    });
+  
+    checkBusinessError(result, new BusinessErrorResponse('RoomIsEmptyError', 'Room is empty!'));
 
     expect(room.closed).toBeFalsy();
     expect(room.currentPlayer).toBeUndefined();
@@ -517,44 +537,34 @@ describe('scramble', () => {
 
 describe('setCurrentWinner', () => {
 
-  it('should not set winner invalid payload (negative)',async () => {
-    const room = new Room();
-  
-    repository.currentRoom = room;
-    
-    const result = await request(app).post('/salas/setarGanhador').send({
-      posicaoCartaVencedora: -1
-    });
-        
-    expect(result.status).toBe(400);
-    expect(result.body.error).not.toBeUndefined();
-    expect(result.body.error).toEqual('InvalidPayload');
-    expect(result.body.message).toEqual('Invalid card position');
-  });
+  const path = '/salas/setarGanhador';
+
+  const sendRequest = async (req?: AuthenticatedRequest) => {
+    return await request(app).post(path).send(req);
+  };
 
   it('should not set winner invalid payload empty',async () => {
     const room = new Room();
-  
     repository.currentRoom = room;
     
-    const result = await request(app).post('/salas/setarGanhador').send();
+    const result = await sendRequest();
         
-    expect(result.status).toBe(400);
-    expect(result.body.error).not.toBeUndefined();
-    expect(result.body.error).toEqual('InvalidPayload');
-    expect(result.body.message).toEqual('Invalid card position');
+    checkInvalidRequestError(result, 'Invalid auth request');
   });
 
   it('should not set winner for empty room',async () => {
     const room = new Room();
   
     repository.currentRoom = room;
+
+    const body: AuthenticatedRequest = {
+      nome: 'Abacaxi',
+      senha: '123'
+    };
     
-    const result = await request(app).post('/salas/setarGanhador').send({
-      posicaoCartaVencedora: 0
-    });
+    const result = await sendRequest(body);
     
-    checkBusinessError(result, new BusinessErrorResponse('GameNotStartedError', 'Game has not been started!', new Map<string, string>()));
+    checkBusinessError(result, new BusinessErrorResponse('RoomIsEmptyError', 'Room is empty!'));
   });
 
   it('should not set winner game not started',async () => {
@@ -564,12 +574,15 @@ describe('setCurrentWinner', () => {
     room.join('PlayerTwo', '123');
 
     repository.currentRoom = room;
+
+    const body: AuthenticatedRequest = {
+      nome: room.players[0].name,
+      senha: '123'
+    };
     
-    const result = await request(app).post('/salas/setarGanhador').send({
-      posicaoCartaVencedora: 0
-    });
+    const result = await sendRequest(body);
     
-    checkBusinessError(result, new BusinessErrorResponse('GameNotStartedError', 'Game has not been started!', new Map<string, string>()));
+    checkBusinessError(result, new BusinessErrorResponse('GameNotStartedError', 'Game has not been started!'));
   });
 
   it('should not set winner game not forecasted',async () => {
@@ -581,13 +594,15 @@ describe('setCurrentWinner', () => {
     room.scramble(3);
 
     repository.currentRoom = room;
+
+    const body: AuthenticatedRequest = {
+      nome: room.players[0].name,
+      senha: '123'
+    };
     
-    const result = await request(app).post('/salas/setarGanhador').send({
-      posicaoCartaVencedora: 0
-    });
+    const result = await sendRequest(body);
     
-    const errorParams = new Map<string, string>();
-    checkBusinessError(result, new BusinessErrorResponse('GameNotForecastedError', 'Game is not forecasted!', errorParams));
+    checkBusinessError(result, new BusinessErrorResponse('GameNotForecastedError', 'Game is not forecasted!'));
   });
 
   it('should not set winner empty desk',async () => {
@@ -603,17 +618,21 @@ describe('setCurrentWinner', () => {
 
     repository.currentRoom = room;
     
-    const result = await request(app).post('/salas/setarGanhador').send({
-      posicaoCartaVencedora: 0
-    });
+    const body: AuthenticatedRequest = {
+      nome: room.players[0].name,
+      senha: '123'
+    };
+
+    const result = await sendRequest(body);
     
     expect(room.currentGame?.isForecasted).toBeTruthy();
 
     const errorParams = new Map<string, string>([
-      ['position', '0'],
-      ['size', '0']
+      ['notPlayedSize', '2'],
+      ['deskSize', '0'],
+      ['allPlayersSize', '2']
     ]);
-    checkBusinessError(result, new BusinessErrorResponse('InvalidCardPositionError', 'Position [0] at desk with size [0] is invalid!', errorParams));
+    checkBusinessError(result, new BusinessErrorResponse('DeskNotCompletedError', 'Players not played 2 with desk size [0] and allPlayers size [2]', errorParams));
   });
 
   it('should not set winner if any player has not played',async () => {
@@ -635,9 +654,12 @@ describe('setCurrentWinner', () => {
 
     repository.currentRoom = room;
     
-    const result = await request(app).post('/salas/setarGanhador').send({
-      posicaoCartaVencedora: 0
-    });
+    const body: AuthenticatedRequest = {
+      nome: room.players[0].name,
+      senha: '123'
+    };
+
+    const result = await sendRequest(body);
     
     expect(room.currentGame?.isForecasted).toBeTruthy();
     expect(room.currentPlayer).toBe(room.players[0]);
@@ -651,45 +673,54 @@ describe('setCurrentWinner', () => {
   });
 
   it('should have a winner',async () => {
+    const cards = ['2♣r', // wildcard
+      'A♦r', 'K♠b', 'Q♠b', 'J♠b', // player 0
+      '10♠b', '9♠b', '8♠b', '7♠b', // player 1
+      '6♠b', '5♠b', '4♠b', '3♠b', // player 2
+
+      '2♠b', 'A♠b', '3♠r', '9♠r', '10♠r', '2♠r', '5♦b', '8♦b', '10♦b', '2♣r', 'A♣r', '5♣r', '3♣r', '3♣b', 'J♣r',
+      '2♥b', '2♥r', '3♥b', 'A♥b', 'J♥b', '5♥r', '9♥r', '10♥r'];
+
+    const spiedDeck = jest.spyOn(Deck, 'getScrambled');
+    spiedDeck.mockReturnValueOnce([...cards]);
+
     const room = new Room();
   
     room.join('PlayerOne', '123');
     room.join('PlayerTwo', '123');
+    room.join('PlayerThree', '123');
 
-    room.scramble(3);
+    room.scramble(4);
 
     room.setForecast(room.players[1], 2);
+    room.setForecast(room.players[2], 2);
     room.setForecast(room.players[0], 2);
-
+    
     if (room.currentPlayer) {
-      room.playCard(room.currentPlayer, 0);
-      room.playCard(room.currentPlayer, 0);
+      room.playCard(room.currentPlayer, 0); // player1 10♠b
+      room.playCard(room.currentPlayer, 0); // player2 3♠b
+      room.playCard(room.currentPlayer, 0); // player0 A♦r
     } else {
       throw Error('should have currentPlayer');
-    }
-
+    }  
     repository.currentRoom = room;
+
+    const expectedWinner = room.players[0]; // player0 A♦r
     
-    const result = await request(app).post('/salas/setarGanhador').send({
-      posicaoCartaVencedora: 1
-    });
+    // when
+    const body: AuthenticatedRequest = {
+      nome: room.players[0].name,
+      senha: '123'
+    };
+
+    const result = await sendRequest(body);
     
-    expect(room.currentGame?.isForecasted).toBeTruthy();
-    expect(room.currentPlayer).toBe(room.players[0]);
+    // then 
     expect(result.status).toBe(200);
-    expect(result.body.nome).toEqual(room.players[0].name);
+    expect(result.body.nome).toEqual(expectedWinner.name);
+    expect(room.currentGame?.isForecasted).toBeTruthy();
+    expect(room.currentPlayer).toBe(expectedWinner);
   });
 
 
-});  
-
-function checkBusinessError(result: request.Response, errorResponse: BusinessErrorResponse) {
-  expect(result.status).toBe(422);
-  expect(result.body.businessError).not.toBeUndefined();
-  expect(result.body.businessError.type).toEqual(errorResponse.type);
-  expect(result.body.businessError.message).toEqual(errorResponse.message);
-  expect(result.body.businessError.params).toEqual(errorResponse.params);
-  //for(const [key, value] of errorResponse.params.entries()) {
-  //  expect(result.body.businessError.params[key]).toEqual(value);
-  //}
-}
+});

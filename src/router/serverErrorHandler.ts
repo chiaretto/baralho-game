@@ -2,6 +2,7 @@ import { Application, ErrorRequestHandler, Request, Response } from 'express';
 import { BusinessErrorResponse } from '../controller/response/BusinessErrorResponse';
 import { CustomError } from '../errors/CustomError';
 import { InvalidRequestError } from '../errors/InvalidRequestError';
+import { PlayerIsNotAdminError } from '../errors/PlayerIsNotAdminError';
 
 const logErrors: ErrorRequestHandler = (err, req, res, next) => {
   console.log('error ' + err.name);
@@ -32,7 +33,12 @@ const notFoundErrorHandler = async(req: Request, res: Response) => {
 };
 
 const customErrors:ErrorRequestHandler = (err, req, res, next) => {
-  if (err instanceof CustomError) {
+  if (err instanceof PlayerIsNotAdminError) {
+    res.status(403);
+    res.json({
+      businessError: BusinessErrorResponse.buildFromCustomError(err)
+    });
+  } else if (err instanceof CustomError) {
     res.status(422);
     res.json({
       businessError: BusinessErrorResponse.buildFromCustomError(err)
@@ -40,7 +46,7 @@ const customErrors:ErrorRequestHandler = (err, req, res, next) => {
   } else if (err instanceof InvalidRequestError) {
     res.status(400);
     res.json({
-      error: 'InvalidPayload',
+      type: 'InvalidPayload',
       message: err.message,
     });  
   } else {

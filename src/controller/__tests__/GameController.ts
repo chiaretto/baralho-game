@@ -7,7 +7,7 @@ import { ForecastRequest, PlayRequest } from '../GameController';
 import { Card } from '../../domain/Deck';
 import { BusinessErrorResponse } from '../response/BusinessErrorResponse';
 import { GamePlayer } from '../../domain/GamePlayer';
-import { Player } from '../../domain/Player';
+import { checkBusinessError, getGamePlayer } from './__utils__/TestHelper';
 
 describe('play', () => {
 
@@ -213,7 +213,7 @@ describe('forecast', () => {
     expect(player).not.toBeUndefined();
     expect(player).toEqual(room.players[1]);
 
-    const gamePlayer = currentGamePlayer(room);
+    const gamePlayer = getGamePlayer(room);
     expect(gamePlayer).not.toBeUndefined();
 
     const body : ForecastRequest = {
@@ -237,7 +237,7 @@ describe('forecast', () => {
     const player1 = room.players[2];
 
     expect(room.currentPlayer).not.toBeUndefined();
-    const gamePlayer = currentGamePlayer(room, player1);
+    const gamePlayer = getGamePlayer(room, player1);
     expect(gamePlayer).not.toBeUndefined();
 
     const body : ForecastRequest = {
@@ -411,7 +411,7 @@ describe('forecast', () => {
 
     const result = await sendRequest(body);
 
-    checkBusinessError(result, new BusinessErrorResponse('GameNotStartedError', 'Game has not been started!', new Map()));
+    checkBusinessError(result, new BusinessErrorResponse('GameNotStartedError', 'Game has not been started!'));
   });
 });
 
@@ -439,19 +439,4 @@ function setupGame(_start?:boolean, _forecast?:boolean) : Room {
   }
   repository.currentRoom = room;
   return room;
-}
-
-function currentGamePlayer(room: Room, player?: Player) : GamePlayer | undefined {
-  if (room.currentGame && room.currentPlayer) {
-    return room.currentGame.findGamePlayer(player ?? room.currentPlayer);
-  }
-  return undefined;
-}
-
-function checkBusinessError(result: request.Response, errorResponse: BusinessErrorResponse) {
-  expect(result.status).toBe(422);
-  expect(result.body.businessError).not.toBeUndefined();
-  expect(result.body.businessError.type).toEqual(errorResponse.type);
-  expect(result.body.businessError.message).toEqual(errorResponse.message);
-  expect(result.body.businessError.params).toEqual(errorResponse.params);
 }

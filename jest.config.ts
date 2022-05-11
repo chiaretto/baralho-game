@@ -8,5 +8,6 @@ export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
   rootDir: './src',
+  testPathIgnorePatterns: ['/__utils__/'],
   setupFiles: ['<rootDir>/../.jest/envVars.js']
 };

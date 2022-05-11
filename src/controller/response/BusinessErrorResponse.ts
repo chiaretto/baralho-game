@@ -5,7 +5,9 @@ export class BusinessErrorResponse {
   type: string;
   params: object;
 
-  constructor(type: string, message: string, params: Map<string, string>) {
+  constructor(type: string, message: string, params?: Map<string, string>) {
+    if (params == undefined)
+      params = new Map();
     this.message = message;
     this.type = type;
     this.params = Object.fromEntries(params.entries());

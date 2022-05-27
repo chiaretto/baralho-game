@@ -183,6 +183,17 @@
                     this.cartas = []
                     window.localStorage.removeItem('nome')
                     window.localStorage.removeItem('senha')
+                }).catch((error) => {
+                    let response = error.response;
+                    if (response) {
+                        if (response.status == 422) {
+                            this.nome = null
+                            this.senha = null
+                            this.cartas = []
+                            window.localStorage.removeItem('nome')
+                            window.localStorage.removeItem('senha')
+                        }
+                    }
                 });
             },
             embaralhar() {
@@ -362,6 +373,17 @@
                                 }
                             } else {
                                 this.sair();
+                            }
+                        })
+                        .catch((error) => {
+                            let response = error.response;
+                            if (response) {
+                                let businessError = response.data.businessError;
+                                if (response.status == 422 && businessError) {
+                                    if (businessError.type == 'RoomIsEmptyError') {
+                                        this.sair();
+                                    }
+                                }
                             }
                         })
                 }

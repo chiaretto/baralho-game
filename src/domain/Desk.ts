@@ -20,7 +20,7 @@ export class Desk {
     return [...this._items];
   }
 
-  getPlayedCard(player: GamePlayer) : DeskItem | undefined {
+  getPlayedCard(player: GamePlayer): DeskItem | undefined {
     return this._items.find((di) => di.player === player);
   }
 }

@@ -6,8 +6,7 @@ import { PlayerNotFoundError } from '../errors/PlayerNotFoundError';
 import { RoomIsEmptyError } from '../errors/RoomIsEmptyError';
 
 export class RequestValidator {
-
-  static validatePlayer(room: Room, authReq: AuthenticatedRequest) : Player {
+  static validatePlayer(room: Room, authReq: AuthenticatedRequest): Player {
     if (authReq.nome == undefined || authReq.senha == undefined) {
       throw new InvalidRequestError('Invalid auth request');
     }

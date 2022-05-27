@@ -1,4 +1,4 @@
-export interface AuthenticatedRequest {
+export type AuthenticatedRequest = {
   nome: string;
   senha: string;
 }

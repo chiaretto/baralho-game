@@ -8,7 +8,6 @@ export class CustomError extends Error {
   }
 
   protected addParam(key: string, value: string | number | undefined) {
-    if (value)
-      this.params.set(key, value.toString());
+    if (value) this.params.set(key, value.toString());
   }
 }

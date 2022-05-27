@@ -23,7 +23,7 @@ export class Room {
     this.currentPlayer = undefined;
   }
 
-  scramble(quantity: number, player?: Player) : boolean {
+  scramble(quantity: number, player?: Player): boolean {
     let dealer = this.players[0];
     if (this.currentGame) {
       dealer = this.nextPlayerRotation(this.currentGame.dealer);
@@ -47,14 +47,16 @@ export class Room {
       throw new GameNotForecastedError();
     }
     const winner = requiredGame.finishDesk();
-    
+
     this.currentPlayer = winner.player;
     // finalizou game
     if (winner.cards.length == 0) {
       this.closed = false;
-      this.players.forEach((p) => p.fullScore += requiredGame.calculateScore(p) ?? 0);
+      this.players.forEach(
+        (p) => (p.fullScore += requiredGame.calculateScore(p) ?? 0)
+      );
     }
-    
+
     return winner.player;
   }
 
@@ -114,17 +116,17 @@ export class Room {
     return gamePlayer;
   }
 
-  setForecast(player: Player, forecast: number) : GamePlayer {
+  setForecast(player: Player, forecast: number): GamePlayer {
     const requiredGame = this.requiredGame;
     const gamePlayer = requiredGame.findGamePlayer(player);
     if (!gamePlayer) {
       throw new PlayerNotFoundError(player.name);
     }
-    if (this.currentPlayer == player && forecast >= 0) {      
+    if (this.currentPlayer == player && forecast >= 0) {
       if (requiredGame.setForecast(gamePlayer, forecast)) {
         this.rotatePlayer();
       } else {
-        throw new ForecastNotAllowedError(player.name, forecast);        
+        throw new ForecastNotAllowedError(player.name, forecast);
       }
     }
     return gamePlayer;
@@ -143,7 +145,7 @@ export class Room {
     return Player.findPlayerByNameAndId(this.players, name, id);
   }
 
-  private get requiredGame() : Game {
+  private get requiredGame(): Game {
     if (this.currentGame) return this.currentGame;
     throw new GameNotStartedError();
   }
@@ -169,19 +171,10 @@ export class Room {
     }
   }
 
-  private nextPlayerRotation(player: Player) : Player {
+  private nextPlayerRotation(player: Player): Player {
     let index = this.players.findIndex((p) => p === player);
-        
-    index = this.nextPlayerPosition(index);
+
+    index = Player.nextPlayerPosition(this.players, index);
     return this.players[index];
   }
-
-  private nextPlayerPosition(position: number) : number {
-    let nextPlayerPosition = position + 1;
-    if (nextPlayerPosition >= this.players.length) {
-      nextPlayerPosition = nextPlayerPosition % this.players.length;
-    }
-    return nextPlayerPosition;
-  }
-
 }

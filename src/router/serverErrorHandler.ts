@@ -22,41 +22,41 @@ const internalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   res.json({
     message: err.message,
     name: err.name,
-    error: err
+    error: err,
   });
 };
 
-const notFoundErrorHandler = async(req: Request, res: Response) => {
+const notFoundErrorHandler = async (req: Request, res: Response) => {
   res.status(404).send({
-    error: 'Page not found!'
+    error: 'Page not found!',
   });
 };
 
-const customErrors:ErrorRequestHandler = (err, req, res, next) => {
+const customErrors: ErrorRequestHandler = (err, req, res, next) => {
   if (err instanceof PlayerIsNotAdminError) {
     res.status(403);
     res.json({
-      businessError: BusinessErrorResponse.buildFromCustomError(err)
+      businessError: BusinessErrorResponse.buildFromCustomError(err),
     });
   } else if (err instanceof CustomError) {
     res.status(422);
     res.json({
-      businessError: BusinessErrorResponse.buildFromCustomError(err)
+      businessError: BusinessErrorResponse.buildFromCustomError(err),
     });
   } else if (err instanceof InvalidRequestError) {
     res.status(400);
     res.json({
       type: 'InvalidPayload',
       message: err.message,
-    });  
+    });
   } else {
     next(err);
   }
 };
 
-export const setupErrorHandler = (app: Application) => {  
+export const setupErrorHandler = (app: Application) => {
   app.all('*', notFoundErrorHandler);
   app.use(customErrors);
-  app.use(logErrors);  
+  app.use(logErrors);
   app.use(internalErrorHandler);
 };

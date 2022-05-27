@@ -18,7 +18,7 @@ export class GamePlayer {
     return this.cards.splice(cardPosition, 1)[0];
   }
 
-  computedScore() : number {
+  computedScore(): number {
     if (this.forecast === this.score) {
       return 3 + this.score;
     }

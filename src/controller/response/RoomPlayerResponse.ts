@@ -18,11 +18,18 @@ export class RoomPlayerResponse {
     this.pontosTotal = player.fullScore;
 
     const gamePlayer = room.currentGame?.findGamePlayer(player);
-    const cards = gamePlayer?.cards ?? [];
-
-    this.quantidadeCartas = cards.length;
-    this.pontosRodada = gamePlayer?.score ?? 0;
-    this.previsaoRodada = gamePlayer?.forecast ?? 0;
-    this.dealer = player === room.currentGame?.dealer;
+    const game = room.currentGame;
+    if (game && gamePlayer) {
+      const cards = gamePlayer.cards;
+      this.quantidadeCartas = cards.length;
+      this.pontosRodada = gamePlayer.score;
+      this.previsaoRodada = gamePlayer.forecast ?? 0;
+      this.dealer = player === game.dealer;
+    } else {
+      this.quantidadeCartas = 0;
+      this.pontosRodada = 0;
+      this.previsaoRodada = 0;
+      this.dealer = false;
+    }
   }
 }

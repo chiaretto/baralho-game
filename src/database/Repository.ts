@@ -1,6 +1,6 @@
 import { Room } from '../domain/Room';
 
-export class Repository {
+class Repository {
   currentRoom: Room;
 
   constructor() {

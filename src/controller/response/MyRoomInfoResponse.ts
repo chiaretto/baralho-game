@@ -11,6 +11,7 @@ export class MyRoomInfoResponse {
   perguntarPrevisao: boolean;
   restricaoPrevisao?: number;
   previsao?: number;
+  nextDealer: boolean;
 
   constructor(player: Player, room: Room, gamePlayer?: GamePlayer) {
     this.nome = player.name;
@@ -25,9 +26,14 @@ export class MyRoomInfoResponse {
       if (this.perguntarPrevisao) {
         this.restricaoPrevisao = currentGame.getForecastRestriction(player);
       }
+
+      const dealerIdx = room.players.findIndex((p) => p === currentGame.dealer);
+      const nextDealerIdx = Player.nextPlayerPosition(room.players, dealerIdx);
+      this.nextDealer = player === room.players[nextDealerIdx];
     } else {
       this.dealer = false;
       this.perguntarPrevisao = false;
+      this.nextDealer = room.players.findIndex((p) => p === player) == 0;
     }
 
     if (gamePlayer) {
@@ -38,12 +44,15 @@ export class MyRoomInfoResponse {
     }
   }
 
-  static fromPlayer(player: Player, room: Room) : MyRoomInfoResponse {
+  static fromPlayer(player: Player, room: Room): MyRoomInfoResponse {
     const gamePlayer = room.currentGame?.findGamePlayer(player);
     return new MyRoomInfoResponse(player, room, gamePlayer);
   }
 
-  static fromGamePlayer(gamePlayer: GamePlayer, room: Room) : MyRoomInfoResponse {
+  static fromGamePlayer(
+    gamePlayer: GamePlayer,
+    room: Room
+  ): MyRoomInfoResponse {
     return new MyRoomInfoResponse(gamePlayer.player, room, gamePlayer);
   }
 }
